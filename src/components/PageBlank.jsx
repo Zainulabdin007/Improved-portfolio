@@ -312,6 +312,13 @@ export default function PageBlank() {
                 ))}
               </ul>
 
+              <div
+                className="contact-shell__webring"
+                data-webring="ca"
+                data-member="zain-bughio"
+                aria-label="Canadian builders webring"
+              />
+
               <p className="contact-shell__rights">
                 Zain Bughio. All rights reserved.
               </p>
