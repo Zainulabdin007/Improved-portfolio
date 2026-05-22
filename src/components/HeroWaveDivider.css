@@ -1,0 +1,32 @@
+.custom-shape-divider-top-1779423198 {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.custom-shape-divider-top-1779423198 svg {
+  position: relative;
+  display: block;
+  width: calc(300% + 1.3px);
+  height: 115px;
+}
+
+.custom-shape-divider-top-1779423198 .shape-fill {
+  fill: #000000;
+}
+
+/* Bottom of hero — flipped from the original “top” template */
+.hero-wave-divider--hero-end {
+  bottom: 0;
+  transform: rotate(180deg);
+}
+
+/* Top of a section — mirror of hero-end (pairs with previous section’s bottom wave) */
+.hero-wave-divider--below {
+  top: 0;
+  transform: none;
+}

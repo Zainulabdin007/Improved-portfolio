@@ -1,0 +1,559 @@
+import { Suspense, useEffect, useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import {
+  Bounds,
+  Center,
+  Environment,
+  Lightformer,
+  useAnimations,
+  useGLTF,
+} from '@react-three/drei'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import {
+  SiPython,
+  SiJavascript,
+  SiTypescript,
+  SiNodedotjs,
+  SiReact,
+  SiNextdotjs,
+  SiHtml5,
+  SiTailwindcss,
+  SiOpenjdk,
+  SiCplusplus,
+  SiTensorflow,
+  SiPytorch,
+  SiScikitlearn,
+  SiNumpy,
+  SiPandas,
+  SiDocker,
+  SiGithub,
+  SiSupabase,
+  SiGit,
+  SiBlender,
+} from 'react-icons/si'
+import { TbCursorText } from 'react-icons/tb'
+import HeroWaveDivider from './HeroWaveDivider'
+import Waves from './Waves'
+import TopoPattern from './TopoPattern'
+import './PageHorizontalFlow.css'
+
+gsap.registerPlugin(ScrollTrigger)
+
+const COMPUTER_URL = '/my_computer.glb'
+const DINO_URL = '/3d_chrome_dino_walking.glb'
+useGLTF.preload(COMPUTER_URL)
+useGLTF.preload(DINO_URL)
+
+/*
+ * 24 logos on an 8 × 4 grid that frames the computer at the center cells
+ * (cols 3-6, rows 2-3). `Icon` is a bundled react-icons component (no
+ * network calls); `src` is a local override the user provided in /public.
+ * Thresholds map onto the spin-phase progress (post horizontal pan).
+ */
+const TECH_LOGOS = [
+  { col: 1, row: 1, name: 'Python',       Icon: SiPython,       threshold: 0.03 },
+  { col: 2, row: 1, name: 'JavaScript',   Icon: SiJavascript,   threshold: 0.07 },
+  { col: 3, row: 1, name: 'TypeScript',   Icon: SiTypescript,   threshold: 0.11 },
+  { col: 4, row: 1, name: 'Node.js',      Icon: SiNodedotjs,    threshold: 0.15 },
+  { col: 5, row: 1, name: 'React',        Icon: SiReact,        threshold: 0.19 },
+  { col: 6, row: 1, name: 'Next.js',      Icon: SiNextdotjs,    threshold: 0.23 },
+  { col: 7, row: 1, name: 'HTML',         Icon: SiHtml5,        threshold: 0.27 },
+  { col: 8, row: 1, name: 'CSS',          src: '/CSS3_logo.svg.png',                    threshold: 0.31 },
+  { col: 1, row: 2, name: 'Tailwind',     Icon: SiTailwindcss,  threshold: 0.35 },
+  { col: 2, row: 2, name: 'Java',         Icon: SiOpenjdk,      threshold: 0.39 },
+  { col: 7, row: 2, name: 'C++',          Icon: SiCplusplus,    threshold: 0.43 },
+  { col: 8, row: 2, name: 'TensorFlow',   Icon: SiTensorflow,   threshold: 0.47 },
+  { col: 1, row: 3, name: 'PyTorch',      Icon: SiPytorch,      threshold: 0.51 },
+  { col: 2, row: 3, name: 'scikit-learn', Icon: SiScikitlearn,  threshold: 0.55 },
+  { col: 7, row: 3, name: 'NumPy',        Icon: SiNumpy,        threshold: 0.59 },
+  { col: 8, row: 3, name: 'Pandas',       Icon: SiPandas,       threshold: 0.63 },
+  { col: 1, row: 4, name: 'OpenAI',       src: '/openai.svg',                           threshold: 0.67 },
+  { col: 2, row: 4, name: 'VS Code',      src: '/Visual_Studio_Code_1.35_icon.svg.png', threshold: 0.71 },
+  { col: 3, row: 4, name: 'Cursor',       Icon: TbCursorText,   threshold: 0.75 },
+  { col: 4, row: 4, name: 'Docker',       Icon: SiDocker,       threshold: 0.79 },
+  { col: 5, row: 4, name: 'GitHub',       Icon: SiGithub,       threshold: 0.83 },
+  { col: 6, row: 4, name: 'Supabase',     Icon: SiSupabase,     threshold: 0.87 },
+  { col: 7, row: 4, name: 'Git',          Icon: SiGit,          threshold: 0.91 },
+  { col: 8, row: 4, name: 'Blender',      Icon: SiBlender,      threshold: 0.95 },
+]
+
+function ComputerModel({ rotationRef }) {
+  const { scene } = useGLTF(COMPUTER_URL)
+  const groupRef = useRef()
+
+  useFrame(() => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = rotationRef.current
+    }
+  })
+
+  return (
+    <group ref={groupRef}>
+      <Center>
+        <primitive object={scene} />
+      </Center>
+    </group>
+  )
+}
+
+/*
+ * The Chrome dino walking model — plays its built-in walking clip and
+ * traverses the bottom-left of the experience panel as the user scrolls
+ * through Phase 4. Position is driven externally via positionRef.x.
+ */
+function DinoModel({ positionRef, scrollActiveRef }) {
+  const groupRef = useRef()
+  const actionRef = useRef(null)
+  const { scene, animations } = useGLTF(DINO_URL)
+  const { actions, names } = useAnimations(animations, groupRef)
+
+  useEffect(() => {
+    if (names.length === 0) return
+    const preferred =
+      names.find((n) => /walk|run|loop|idle/i.test(n)) || names[0]
+    const action = actions[preferred]
+    if (action) {
+      action.reset().fadeIn(0.2).play()
+      action.timeScale = 1.1
+      actionRef.current = action
+    }
+    return () => {
+      action?.fadeOut(0.2)
+      actionRef.current = null
+    }
+  }, [actions, names])
+
+  useFrame(() => {
+    if (!groupRef.current) return
+    const pos = positionRef.current
+    if (typeof pos !== 'number') return
+
+    groupRef.current.position.x = pos
+
+    // Pause the walk loop when the user isn't actively scrubbing. While
+    // scrolling, the legs keep cycling — even if the dino has parked at the
+    // end of his path he visually walks in place. The instant the user
+    // stops, his legs freeze mid-step.
+    if (actionRef.current) {
+      const lastActive = scrollActiveRef?.current ?? 0
+      const isScrolling = performance.now() - lastActive < 150
+      actionRef.current.paused = !isScrolling
+    }
+  })
+
+  // position[1] anchors the dino near the bottom edge of the canvas (in
+  // world units, before scaling) — tweak if his feet sit too high/low.
+  return (
+    <group ref={groupRef} scale={0.5} position={[0, -1, 0]}>
+      <Center>
+        <primitive object={scene} />
+      </Center>
+    </group>
+  )
+}
+
+/*
+ * Scroll choreography across 3 horizontal panels + 3 experience slides.
+ *
+ *   Phase 0 (0      → RISE_END)   about card rises from below
+ *   Phase 1 (RISE   → PAN1_END)   pan: about → computer    (-100vw)
+ *   Phase 2 (PAN1   → SPIN_END)   computer spins, logos reveal
+ *   Phase 3 (SPIN   → PAN2_END)   pan: computer → experience (-200vw)
+ *   Phase 4 (PAN2   → 1)          three experience slides cycle in/out
+ *
+ * Section is sized so each slide gets ~1 viewport of scroll inside Phase 4.
+ */
+const RISE_END = 0.1
+const PAN1_END = 0.2
+const SPIN_END = 0.55
+const PAN2_END = 0.65
+
+// Each slide animates through enter → dwell → exit windows on global progress.
+// The last slide has no exit so it stays visible at the bottom of the section.
+const SLIDES = [
+  { enterStart: 0.65, enterEnd: 0.69, exitStart: 0.74, exitEnd: 0.78 },
+  { enterStart: 0.78, enterEnd: 0.82, exitStart: 0.86, exitEnd: 0.9 },
+  { enterStart: 0.9, enterEnd: 0.93, exitStart: null, exitEnd: null },
+]
+
+const EXPERIENCES = [
+  {
+    title: 'Information Technology Intern',
+    company: 'CDI College',
+    dates: 'Jul 2024 — Aug 2024',
+    location: 'Mississauga, ON',
+    bullets: [
+      'Installed, configured, and maintained desktops, laptops, printers, and mobile devices via Microsoft Intune.',
+      'Troubleshot hardware, software, and peripheral issues — keeping downtime minimal for 500+ students and staff.',
+      'Provided responsive technical assistance, contributing to seamless daily IT operations across the campus.',
+    ],
+  },
+  {
+    title: 'Software Engineer',
+    company: 'PixelsBoost',
+    dates: 'May 2025 — Dec 2025',
+    location: 'Milton, ON',
+    bullets: [
+      'Engineered and shipped 6 production full-stack sites in React, HTML/CSS, and JavaScript — dynamic contact forms, interactive galleries, fully responsive nav — collectively serving 1,500+ monthly active users.',
+      'Architected integrations with 3 mission-critical APIs (Stripe, Google Maps, SendGrid), enabling $10K+ in monthly payment processing and automated email workflows at 99% uptime.',
+      'Delivered 5 simultaneous client projects in an agile environment: 200+ commits across 20+ feature branches, mentored 2 designers, and resolved 15+ merge conflicts.',
+      'Drove a 40% performance uplift via WebP compression, lazy loading, and Cloudflare CDN — Lighthouse scores 65 → 86, bounce rates down 15%.',
+    ],
+  },
+  {
+    title: 'IT Support Specialist',
+    company: 'Waterloo Regional Health Network',
+    dates: 'May 2026 — Present',
+    location: 'Kitchener, ON',
+    bullets: [
+      'Migrate clinical workstations from the legacy GRHosp domain to the unified WRHN domain, preserving authentication and continuity of care for hospital staff.',
+      'Image and reimage laptops via PXE boot, then configure device permissions and deploy required software for physicians, nurses, and administrative teams.',
+      'Triage and resolve end-to-end hardware and software issues alongside a tight-knit IT team, keeping critical clinical workflows online.',
+      'Operate under strict patient-privacy and healthcare security standards while supporting doctors and staff across multiple departments.',
+    ],
+  },
+]
+
+// Quadratic ease-out — fast lift, soft settle
+const easeOut = (t) => 1 - Math.pow(1 - t, 2)
+
+// Slides travel horizontally: enter from the right (+80vw), dwell at 0,
+// exit to the left (-80vw). The last slide has null exit windows and
+// stays parked at x=0 / opacity=1.
+function computeSlideState(p, slide) {
+  const { enterStart, enterEnd, exitStart, exitEnd } = slide
+  if (p < enterStart) return { x: 80, opacity: 0 }
+  if (p < enterEnd) {
+    const t = easeOut((p - enterStart) / (enterEnd - enterStart))
+    return { x: (1 - t) * 80, opacity: t }
+  }
+  if (exitStart === null || p < exitStart) return { x: 0, opacity: 1 }
+  if (p < exitEnd) {
+    const t = (p - exitStart) / (exitEnd - exitStart)
+    return { x: -t * 80, opacity: 1 - t }
+  }
+  return { x: -80, opacity: 0 }
+}
+
+export default function PageHorizontalFlow() {
+  const sectionRef = useRef(null)
+  const trackRef = useRef(null)
+  const cardRef = useRef(null)
+  const computerStageRef = useRef(null)
+  const slidesRef = useRef([])
+  const rotationRef = useRef(0)
+  const dinoPosRef = useRef(-3) // starts off-screen left (world units)
+  const scrollActiveRef = useRef(0) // timestamp of last scroll-trigger update
+
+  useEffect(() => {
+    const section = sectionRef.current
+    const track = trackRef.current
+    const card = cardRef.current
+    const stage = computerStageRef.current
+    if (!section || !track || !card || !stage) return
+
+    const trigger = ScrollTrigger.create({
+      trigger: section,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 0.4,
+      onUpdate: (self) => {
+        const p = self.progress
+        scrollActiveRef.current = performance.now()
+
+        if (p < RISE_END) {
+          // Phase 0 — about card rises into view
+          const t = easeOut(p / RISE_END)
+          card.style.setProperty('--rise', `${(1 - t) * 120}vh`)
+          card.style.setProperty('--rise-opacity', String(t))
+          track.style.transform = 'translate3d(0, 0, 0)'
+          rotationRef.current = 0
+          stage.style.setProperty('--progress', '0')
+        } else if (p < PAN1_END) {
+          // Phase 1 — pan to computer
+          card.style.setProperty('--rise', '0vh')
+          card.style.setProperty('--rise-opacity', '1')
+          const panProgress = (p - RISE_END) / (PAN1_END - RISE_END)
+          track.style.transform = `translate3d(${-panProgress * 100}vw, 0, 0)`
+          rotationRef.current = 0
+          stage.style.setProperty('--progress', '0')
+        } else if (p < SPIN_END) {
+          // Phase 2 — computer spin + logo reveal
+          track.style.transform = 'translate3d(-100vw, 0, 0)'
+          const spinProgress = (p - PAN1_END) / (SPIN_END - PAN1_END)
+          rotationRef.current = spinProgress * Math.PI * 4
+          stage.style.setProperty('--progress', String(spinProgress))
+        } else if (p < PAN2_END) {
+          // Phase 3 — pan to experience
+          track.style.transform = `translate3d(${
+            -100 - ((p - SPIN_END) / (PAN2_END - SPIN_END)) * 100
+          }vw, 0, 0)`
+          rotationRef.current = Math.PI * 4
+          stage.style.setProperty('--progress', '1')
+        } else {
+          // Phase 4 — experience panel pinned in view
+          track.style.transform = 'translate3d(-200vw, 0, 0)'
+          rotationRef.current = Math.PI * 4
+          stage.style.setProperty('--progress', '1')
+        }
+
+        // Experience slides — always recomputed so they idle off-screen
+        // until Phase 4, then sequentially cycle in/out as scroll continues.
+        SLIDES.forEach((slide, i) => {
+          const el = slidesRef.current[i]
+          if (!el) return
+          const { x, opacity } = computeSlideState(p, slide)
+          el.style.transform = `translate3d(${x}vw, 0, 0)`
+          el.style.opacity = String(opacity)
+        })
+
+        // Dino walks the FIRST third of his path during Phase 4, then parks.
+        // World x range while walking: -1.4 → -0.4 (left-of-center stop).
+        if (p < PAN2_END) {
+          dinoPosRef.current = -3 // parked off-screen left
+        } else {
+          const expProgress = Math.min((p - PAN2_END) / (1 - PAN2_END), 0.35)
+          // Linear scaling so the dino reaches his end position by p=0.35.
+          // After that he stays parked; the leg animation keeps going so
+          // long as the user is still scrolling (handled in DinoModel).
+          dinoPosRef.current = -1.4 + (expProgress / 0.35) * 1.0
+        }
+      },
+    })
+
+    return () => trigger.kill()
+  }, [])
+
+  return (
+    <section
+      ref={sectionRef}
+      id="about"
+      className="page-section page-section--hflow"
+      aria-label="About Zain Bughio and tech stack"
+    >
+      <HeroWaveDivider placement="below" />
+
+      <div className="hflow-pin">
+        <div ref={trackRef} className="hflow-track">
+          {/* Panel 1 — About card on vibrant yellow */}
+          <div className="hflow-panel hflow-panel--about">
+            <div className="hflow-panel__bg" aria-hidden="true">
+              <Waves
+                lineColor="rgba(0, 0, 0, 0.18)"
+                backgroundColor="transparent"
+                waveSpeedX={0.0125}
+                waveSpeedY={0.01}
+                waveAmpX={40}
+                waveAmpY={20}
+                friction={0.9}
+                tension={0.01}
+                maxCursorMove={120}
+                xGap={12}
+                yGap={36}
+              />
+            </div>
+            <article ref={cardRef} className="hflow-card">
+              <TopoPattern className="hflow-card__topo" />
+              <div className="hflow-card__inner">
+                <div className="hflow-photo">
+                  <img src="/Pics_to_add.jpg" alt="Zain Bughio" loading="lazy" />
+                </div>
+                <div className="hflow-text">
+                  <h2 className="hflow-text__name">Zain Bughio</h2>
+                  <p>
+                    A passionate developer with a foundation in coding that
+                    began in grade 11, I have since built hands-on experience
+                    spanning software development and robotics. I bring a
+                    strong technical mindset coupled with a drive for
+                    continuous learning and growth.
+                  </p>
+                  <p>
+                    Outside of my technical pursuits, I maintain a disciplined
+                    lifestyle through fitness and draw creativity and focus
+                    from diverse interests, I'm into anime, hitting the gym,
+                    hanging out with friends, and playing video games. I'm
+                    someone who thrives on seeking new knowledge and
+                    experiences, and I bring that same curiosity and
+                    dedication to everything I build.
+                  </p>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          {/* Panel 2 — Computer scene on dark black + orange */}
+          <div className="hflow-panel hflow-panel--computer">
+            <div className="hflow-panel__bg" aria-hidden="true">
+              <Waves
+                lineColor="rgba(251, 146, 60, 0.22)"
+                backgroundColor="transparent"
+                waveSpeedX={0.0125}
+                waveSpeedY={0.01}
+                waveAmpX={40}
+                waveAmpY={20}
+                friction={0.9}
+                tension={0.01}
+                maxCursorMove={120}
+                xGap={12}
+                yGap={36}
+              />
+            </div>
+            <div ref={computerStageRef} className="hflow-stage">
+              <ul className="hflow-grid" aria-label="Languages, frameworks, and tools">
+                {TECH_LOGOS.map((logo) => (
+                  <li
+                    key={logo.name}
+                    className="hflow-tile"
+                    aria-label={logo.name}
+                    style={{
+                      '--col': logo.col,
+                      '--row': logo.row,
+                      '--threshold': logo.threshold,
+                    }}
+                  >
+                    {logo.Icon ? (
+                      <logo.Icon
+                        className="hflow-tile__svg"
+                        aria-hidden="true"
+                        focusable="false"
+                      />
+                    ) : (
+                      <img
+                        src={logo.src}
+                        alt={logo.name}
+                        className="hflow-tile__icon"
+                        loading="eager"
+                      />
+                    )}
+                  </li>
+                ))}
+
+                <li className="hflow-computer-cell" aria-hidden="true">
+                  <Canvas
+                    dpr={[1, 1.5]}
+                    camera={{ position: [0, 0.6, 4], fov: 32 }}
+                    gl={{ antialias: true, alpha: true }}
+                  >
+                    <ambientLight intensity={0.75} />
+                    <directionalLight position={[3, 4, 3]} intensity={1.3} />
+                    <directionalLight position={[-3, 2, -3]} intensity={0.55} />
+                    <pointLight position={[0, 2, 3]} intensity={6} distance={12} />
+                    <Suspense fallback={null}>
+                      <Bounds fit clip observe margin={1.15}>
+                        <ComputerModel rotationRef={rotationRef} />
+                      </Bounds>
+                      {/* Local HDR-free environment so we never fetch a preset */}
+                      <Environment resolution={256}>
+                        <Lightformer
+                          form="rect"
+                          intensity={1.6}
+                          color="#ffffff"
+                          position={[0, 3, 4]}
+                          rotation={[-Math.PI / 4, 0, 0]}
+                          scale={[10, 6, 1]}
+                        />
+                        <Lightformer
+                          form="rect"
+                          intensity={0.9}
+                          color="#fb923c"
+                          position={[-4, -1, 2]}
+                          scale={[6, 6, 1]}
+                        />
+                        <Lightformer
+                          form="rect"
+                          intensity={0.6}
+                          color="#f5f5f7"
+                          position={[4, 1, 2]}
+                          scale={[6, 6, 1]}
+                        />
+                      </Environment>
+                    </Suspense>
+                  </Canvas>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Panel 3 — Experience on a sunset-to-twilight gradient */}
+          <div
+            id="experience"
+            className="hflow-panel hflow-panel--experience"
+          >
+            <div className="hflow-panel__bg" aria-hidden="true">
+              <Waves
+                lineColor="rgba(255, 255, 255, 0.18)"
+                backgroundColor="transparent"
+                waveSpeedX={0.0125}
+                waveSpeedY={0.01}
+                waveAmpX={40}
+                waveAmpY={20}
+                friction={0.9}
+                tension={0.01}
+                maxCursorMove={120}
+                xGap={12}
+                yGap={36}
+              />
+            </div>
+
+            {/* Walking chrome dino in the bottom-left corner */}
+            <div className="hflow-dino-stage" aria-hidden="true">
+              <Canvas
+                dpr={[1, 1.5]}
+                camera={{ position: [0, 0.4, 4], fov: 30 }}
+                gl={{ antialias: true, alpha: true }}
+              >
+                <ambientLight intensity={0.75} />
+                <directionalLight position={[3, 4, 3]} intensity={1.1} />
+                <directionalLight position={[-3, 2, -3]} intensity={0.5} />
+                <Suspense fallback={null}>
+                  <DinoModel
+                    positionRef={dinoPosRef}
+                    scrollActiveRef={scrollActiveRef}
+                  />
+                </Suspense>
+              </Canvas>
+            </div>
+
+            <div className="hflow-experience">
+              <header className="hflow-experience__header">
+                <h2 className="hflow-experience__title">Where I've Worked</h2>
+                <p className="hflow-experience__lede">
+                  Three stops so far — from campus IT to full-stack
+                  engineering to clinical infrastructure.
+                </p>
+              </header>
+
+              <div className="hflow-slides">
+                {EXPERIENCES.map((exp, i) => (
+                  <article
+                    key={exp.company}
+                    ref={(el) => (slidesRef.current[i] = el)}
+                    className="hflow-slide"
+                  >
+                    <header className="hflow-slide__header">
+                      <p className="hflow-slide__dates">{exp.dates}</p>
+                      <h3 className="hflow-slide__role">{exp.title}</h3>
+                      <p className="hflow-slide__company">
+                        <span>{exp.company}</span>
+                        <span className="hflow-slide__sep">·</span>
+                        <span>{exp.location}</span>
+                      </p>
+                    </header>
+                    <ul className="hflow-slide__bullets">
+                      {exp.bullets.map((b, j) => (
+                        <li key={j}>{b}</li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <HeroWaveDivider placement="hero-end" />
+    </section>
+  )
+}

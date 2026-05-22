@@ -1,0 +1,523 @@
+/* ============================================================
+ * Page: Projects + Contact (#projects → #contact)
+ *   - Tall scroll zone; sticky viewport pins the scene
+ *   - Phase 1: scroll through projects (track at 0)
+ *   - Phase 2: horizontal pan left to blank contact panel
+ * ============================================================ */
+
+.page-section--blank {
+  position: relative;
+  width: 100%;
+  /* ~3.2 vp for projects scroll-through + ~1 vp for horizontal pan */
+  height: 420vh;
+  height: 420svh;
+  background: #5227ff;
+  overflow: visible;
+  isolation: isolate;
+}
+
+/* Sticky viewport — locks while user scrolls the tall section */
+.projects-pin {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* WebGL canvas — spans the full pinned viewport */
+.blank-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.blank-bg .gradient-blinds-container {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+.blank-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      transparent 0%,
+      rgba(8, 4, 20, 0.35) 70%
+    ),
+    radial-gradient(
+      120% 100% at 50% 100%,
+      rgba(8, 4, 20, 0.65) 0%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, rgba(8, 4, 20, 0.2) 0%, rgba(8, 4, 20, 0.45) 100%);
+}
+
+.page-section--blank .hero-wave-divider {
+  z-index: 6;
+}
+.page-section--blank .hero-wave-divider--below .shape-fill {
+  fill: #050505;
+}
+
+/* Horizontal track — 200vw, two panels side by side */
+.projects-track {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 200vw;
+  height: 100%;
+  /* Start on the projects panel (second panel in the track) */
+  transform: translate3d(-100vw, 0, 0);
+  will-change: transform;
+}
+
+.projects-panel {
+  flex: 0 0 100vw;
+  width: 100vw;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Contact panel */
+.projects-panel--contact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(48px, 8vh, 96px) clamp(24px, 5vw, 64px);
+}
+
+.contact-shell {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 640px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(28px, 4vh, 44px);
+  padding: clamp(48px, 6vw, 72px) clamp(36px, 5vw, 56px);
+  border-radius: clamp(24px, 2.6vw, 32px);
+  background: rgba(8, 4, 20, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 159, 252, 0.08);
+  color: #f5f5f7;
+  font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+}
+
+.contact-shell__title {
+  margin: 0;
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+  font-variation-settings: 'wdth' 90, 'opsz' 96;
+  text-shadow:
+    0 4px 28px rgba(0, 0, 0, 0.4),
+    0 0 48px rgba(255, 159, 252, 0.2);
+}
+
+.contact-shell__message {
+  margin: 0;
+  max-width: 42ch;
+  font-size: clamp(1rem, 1.15vw, 1.12rem);
+  line-height: 1.7;
+  color: rgba(245, 245, 247, 0.88);
+}
+
+.contact-shell__socials {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(12px, 2vw, 20px);
+  width: 100%;
+}
+
+.contact-shell__social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: clamp(0.82rem, 0.95vw, 0.92rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.contact-shell__social-link svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.contact-shell__social-link:hover {
+  background: rgba(255, 159, 252, 0.18);
+  border-color: rgba(255, 159, 252, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(255, 159, 252, 0.2);
+}
+
+.contact-shell__rights {
+  margin: 0;
+  padding-top: clamp(16px, 2vh, 24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: clamp(0.75rem, 0.85vw, 0.82rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 247, 0.55);
+}
+
+/* Vertical scroll driven by GSAP transform on the shell */
+.projects-panel--projects .projects-shell {
+  will-change: transform;
+}
+
+/* ============================================================
+ * Projects panel content
+ * ============================================================ */
+
+.projects-shell {
+  position: relative;
+  z-index: 1;
+  width: min(96vw, 1480px);
+  margin: 0 auto;
+  padding: clamp(100px, 14vh, 160px) 0 clamp(80px, 12vh, 140px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(80px, 12vh, 140px);
+  color: #f5f5f7;
+  font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+}
+/* ============================================================
+ * Header
+ * ============================================================ */
+
+.projects-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.projects-header.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.projects-header__eyebrow {
+  margin: 0;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: clamp(0.78rem, 0.9vw, 0.95rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 159, 252, 0.95);
+}
+
+.projects-header__title {
+  margin: 0;
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.8rem, 7.5vw, 6rem);
+  line-height: 0.94;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+  font-variation-settings: 'wdth' 90, 'opsz' 96;
+  text-shadow:
+    0 4px 32px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(255, 159, 252, 0.18);
+}
+
+.projects-header__lede {
+  margin: 0;
+  max-width: 56ch;
+  font-size: clamp(1rem, 1.15vw, 1.15rem);
+  line-height: 1.6;
+  color: rgba(245, 245, 247, 0.85);
+}
+
+/* ============================================================
+ * Project list
+ * ============================================================ */
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(80px, 12vh, 140px);
+}
+
+/* Individual project — reveal wrapper holding a BorderGlow card */
+.project-card {
+  --accent: #ff9ffc;
+  position: relative;
+
+  opacity: 0;
+  transform: translate3d(0, 48px, 0);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.project-card.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* The BorderGlow root — give it full width and the same accent context */
+.project-card .project-card__glow {
+  width: 100%;
+}
+
+/* Inner two-column grid — screenshot column gets more space */
+.project-card__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 0.85fr);
+  gap: clamp(28px, 3.5vw, 52px);
+  align-items: center;
+  padding: clamp(28px, 3.5vw, 48px);
+}
+
+.project-card--flipped .project-card__inner {
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.65fr);
+}
+.project-card--flipped .project-card__media {
+  order: 2;
+}
+.project-card--flipped .project-card__body {
+  order: 1;
+}
+
+/* ============================================================
+ * Media — tilted screenshot with glow + ambient shadow
+ * ============================================================ */
+
+.project-card__media {
+  position: relative;
+  perspective: 1400px;
+  width: 100%;
+  min-width: 0;
+}
+
+.project-card__shot {
+  position: relative;
+  width: 100%;
+  border-radius: clamp(14px, 1.4vw, 20px);
+  overflow: hidden;
+  background: rgba(8, 4, 20, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: rotateY(-6deg) rotateX(2deg);
+  transform-origin: center;
+  transition: transform 0.6s ease, box-shadow 0.6s ease;
+  will-change: transform;
+}
+.project-card--flipped .project-card__shot {
+  transform: rotateY(6deg) rotateX(2deg);
+}
+
+.project-card__shot:hover {
+  transform: rotateY(0deg) rotateX(0deg) scale(1.02);
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 90px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.project-card__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Soft accent glow behind the screenshot */
+.project-card__shadow {
+  position: absolute;
+  inset: 6% 4% 10% 4%;
+  z-index: -1;
+  border-radius: 24px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--accent) 55%, transparent) 0%,
+    transparent 70%
+  );
+  filter: blur(60px);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ============================================================
+ * Body — index, title, highlights, stack chips
+ * ============================================================ */
+
+.project-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.project-card__index {
+  margin: 0;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: clamp(0.85rem, 0.95vw, 1rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.project-card__title {
+  margin: 0;
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.4rem, 5.6vw, 4.2rem);
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  color: #ffffff;
+  font-variation-settings: 'wdth' 90, 'opsz' 96;
+}
+
+.project-card__subtitle {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.05vw, 1.05rem);
+  color: rgba(245, 245, 247, 0.78);
+}
+
+/* Highlight blocks */
+.project-card__highlights {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.project-card__highlights li {
+  position: relative;
+  padding: 16px 18px 16px 22px;
+  border-radius: 14px;
+  background: rgba(8, 4, 20, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  backdrop-filter: blur(8px) saturate(140%);
+}
+
+.project-card__highlights li::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.project-card__highlights h4 {
+  margin: 0 0 4px;
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(1rem, 1.1vw, 1.1rem);
+  color: #ffffff;
+}
+
+.project-card__highlights p {
+  margin: 0;
+  font-size: clamp(0.9rem, 0.95vw, 0.98rem);
+  line-height: 1.55;
+  color: rgba(245, 245, 247, 0.82);
+}
+
+/* Tech stack chips */
+.project-card__stack {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-card__stack li {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: clamp(0.72rem, 0.78vw, 0.82rem);
+  letter-spacing: 0.04em;
+  color: rgba(245, 245, 247, 0.92);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+}
+
+/* ============================================================
+ * Responsive
+ * ============================================================ */
+
+@media (max-width: 900px) {
+  .project-card__inner,
+  .project-card--flipped .project-card__inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .project-card--flipped .project-card__media,
+  .project-card--flipped .project-card__body {
+    order: initial;
+  }
+
+  .project-card__shot,
+  .project-card--flipped .project-card__shot {
+    transform: none;
+  }
+
+  .project-card__shot:hover {
+    transform: scale(1.01);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-header,
+  .project-card,
+  .project-card__shot {
+    transition: none;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

@@ -1,0 +1,96 @@
+/*
+ * --hand-progress: 0  → hand is fully off-screen
+ * --hand-progress: 1  → hand at its final on-screen position
+ * GSAP scrubs this value as the user scrolls through page 2.
+ */
+.hero__hand {
+  --hand-progress: 0;
+  position: absolute;
+  top: 52%;
+  z-index: 3;
+  width: min(38vw, 400px);
+  height: min(75vh, 760px);
+  pointer-events: none;
+  opacity: 1;
+  line-height: 0;
+  will-change: transform;
+}
+
+.hero__hand--left {
+  left: -4vw;
+  top: 46%;
+  transform: translate(calc((1 - var(--hand-progress)) * -120vw), -46%) scale(3);
+  transform-origin: left center;
+}
+
+.hero__hand--right {
+  right: -1vw;
+  left: auto;
+  top: 46%;
+  transform: translate(calc((1 - var(--hand-progress)) * 120vw), -44%) scale(3);
+  transform-origin: right center;
+}
+
+.hero__hand__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left 55% center;
+  opacity: 1;
+  /* Black in the PNG drops out; white lines stay solid white */
+  mix-blend-mode: screen;
+  -webkit-mix-blend-mode: screen;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.hero__hand--right .hero__hand__img {
+  object-position: right 55% center;
+  transform: rotate(180deg);
+}
+
+@media (max-width: 900px) {
+  .hero__hand {
+    width: min(42vw, 320px);
+    height: min(68vh, 580px);
+  }
+
+  .hero__hand--left {
+    left: -7vw;
+    top: 44%;
+    transform: translate(calc((1 - var(--hand-progress)) * -120vw), -46%) scale(3);
+  }
+
+  .hero__hand--right {
+    right: -2vw;
+    top: 43%;
+    transform: translate(calc((1 - var(--hand-progress)) * 120vw), -44%) scale(3);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero__hand {
+    top: 54%;
+    width: min(48vw, 240px);
+    height: min(60vh, 440px);
+  }
+
+  .hero__hand--left {
+    left: -9vw;
+    top: 48%;
+    transform: translate(calc((1 - var(--hand-progress)) * -120vw), -44%) scale(2.2);
+  }
+
+  .hero__hand--right {
+    right: -3vw;
+    top: 48%;
+    transform: translate(calc((1 - var(--hand-progress)) * 120vw), -42%) scale(2.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__hand {
+    --hand-progress: 1;
+  }
+}
