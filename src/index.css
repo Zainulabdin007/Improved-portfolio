@@ -10,6 +10,13 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: auto;
+
+  /* Reserve scrollbar gutter so the layout doesn't shift when content jumps */
+  scrollbar-gutter: stable;
+
+  /* Firefox — thin auto-hiding-style track */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 120, 130, 0.55) transparent;
 }
 
 html,
@@ -26,6 +33,71 @@ body {
   font-family:
     -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue',
     Helvetica, Arial, sans-serif;
+
+  /* Prevent iOS rubber-band exposing white */
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+ * Modern minimalist scrollbar
+ * Thin, rounded, semi-transparent. Tints to a subtle violet on
+ * hover. Applies to the main page scroll (html/body) and any
+ * scrollable element that opts in via the .has-modern-scroll class.
+ * ============================================================ */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.has-modern-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.has-modern-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.has-modern-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 120, 130, 0.55);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.has-modern-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(82, 39, 255, 0.65);
+}
+
+html::-webkit-scrollbar-thumb:active,
+body::-webkit-scrollbar-thumb:active,
+.has-modern-scroll::-webkit-scrollbar-thumb:active {
+  background-color: rgba(82, 39, 255, 0.85);
+}
+
+html::-webkit-scrollbar-corner,
+body::-webkit-scrollbar-corner,
+.has-modern-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Hide the scrollbar entirely on touch devices — they have their own
+   native indicators and the constant gutter looks awkward there. */
+@media (hover: none) and (pointer: coarse) {
+  html {
+    scrollbar-gutter: auto;
+    scrollbar-width: none;
+  }
+  body::-webkit-scrollbar,
+  html::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
 }
 
 /* webring.ca — fixed top-right, same tier as the nav hotbar */
@@ -62,5 +134,13 @@ body {
     min-height: 52px;
     padding: 8px 14px;
     --webring-size: 0.95rem;
+  }
+}
+
+/* On narrow phones the webring widget overlaps the nav hotbar. Tuck it
+ * away — the nav is the priority chrome on tiny viewports. */
+@media (max-width: 520px) {
+  .site-webring {
+    display: none;
   }
 }

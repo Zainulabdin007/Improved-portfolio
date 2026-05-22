@@ -16,6 +16,14 @@ const LINE_DELAY_MS = 160
 const FADE_MS = 600
 const MIN_VISIBLE_MS = BOOT_LINES.length * LINE_DELAY_MS + 700
 
+/** Phones / small touch viewports — show opt-in before entering the site. */
+function isMobileExperience() {
+  if (typeof window === 'undefined') return false
+  const narrow = window.matchMedia('(max-width: 768px)').matches
+  const coarse = window.matchMedia('(pointer: coarse)').matches
+  return narrow || (coarse && window.innerWidth < 900)
+}
+
 function TopographicCard() {
   return (
     <div className="loading-screen__map" aria-hidden="true">
@@ -69,9 +77,71 @@ function TopographicCard() {
   )
 }
 
+function MobileWarningPrompt({ onContinue, onDecline }) {
+  return (
+    <div
+      className="loading-screen__mobile-prompt"
+      role="dialog"
+      aria-labelledby="mobile-warning-title"
+      aria-describedby="mobile-warning-desc"
+    >
+      <p className="loading-screen__mobile-kicker">Viewport advisory</p>
+      <h2 id="mobile-warning-title" className="loading-screen__mobile-title">
+        Mobile device detected
+      </h2>
+      <p id="mobile-warning-desc" className="loading-screen__mobile-desc">
+        This portfolio is built for scroll-driven 3D scenes and wide layouts.
+        It will run on your phone, but animations may feel slower and some panels
+        are easier to explore on a laptop or desktop.
+      </p>
+      <p className="loading-screen__mobile-question">
+        Are you sure you want to continue and load the full experience?
+      </p>
+      <div className="loading-screen__mobile-actions">
+        <button
+          type="button"
+          className="loading-screen__btn loading-screen__btn--primary"
+          onClick={onContinue}
+        >
+          Yes, continue
+        </button>
+        <button
+          type="button"
+          className="loading-screen__btn loading-screen__btn--ghost"
+          onClick={onDecline}
+        >
+          Not now
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function MobileDeclinedPanel({ onContinueAnyway }) {
+  return (
+    <div className="loading-screen__mobile-declined" role="status">
+      <p className="loading-screen__mobile-kicker">Standing by</p>
+      <h2 className="loading-screen__mobile-title">Best on a larger screen</h2>
+      <p className="loading-screen__mobile-desc">
+        No worries — open this site on a laptop or desktop when you can for the
+        full scroll experience. You can still load it here if you need to.
+      </p>
+      <button
+        type="button"
+        className="loading-screen__btn loading-screen__btn--link"
+        onClick={onContinueAnyway}
+      >
+        Load on this device anyway
+      </button>
+    </div>
+  )
+}
+
 /** Boot-style loading overlay shown until fonts + window assets are ready. */
 export default function LoadingScreen({ onDone }) {
   const [done, setDone] = useState(false)
+  /* boot → prompt (mobile only) → declined | exiting */
+  const [phase, setPhase] = useState('boot')
 
   useEffect(() => {
     const fonts =
@@ -89,54 +159,95 @@ export default function LoadingScreen({ onDone }) {
     const minTime = new Promise((resolve) => setTimeout(resolve, MIN_VISIBLE_MS))
 
     let cancelled = false
-    Promise.all([fonts, winLoad, minTime]).then(() => {
+    let exitTimer
+
+    const enterSite = () => {
       if (cancelled) return
+      setPhase('exiting')
       setDone(true)
-      setTimeout(() => {
+      exitTimer = window.setTimeout(() => {
         if (!cancelled) onDone?.()
       }, FADE_MS)
+    }
+
+    Promise.all([fonts, winLoad, minTime]).then(() => {
+      if (cancelled) return
+      if (isMobileExperience()) {
+        setPhase('prompt')
+      } else {
+        enterSite()
+      }
     })
 
     document.body.style.overflow = 'hidden'
 
     return () => {
       cancelled = true
+      if (exitTimer) window.clearTimeout(exitTimer)
       document.body.style.overflow = ''
     }
   }, [onDone])
 
+  const handleContinue = () => {
+    setPhase('exiting')
+    setDone(true)
+    window.setTimeout(() => onDone?.(), FADE_MS)
+  }
+
+  const showBoot = phase === 'boot'
+  const showPrompt = phase === 'prompt'
+  const showDeclined = phase === 'declined'
+
   return (
-    <div className={`loading-screen${done ? ' is-done' : ''}`} aria-hidden={done}>
+    <div
+      className={`loading-screen${done ? ' is-done' : ''}${showPrompt || showDeclined ? ' is-mobile-gate' : ''}`}
+      aria-hidden={done}
+    >
       <div className="loading-screen__scanlines" aria-hidden="true" />
 
       <div className="loading-screen__inner">
-        <div className="loading-screen__terminal" role="status" aria-live="polite">
-          {BOOT_LINES.map((line, i) => (
-            <div
-              key={line.label}
-              className={`loading-screen__line is-${line.kind}`}
-              style={{ animationDelay: `${i * LINE_DELAY_MS}ms` }}
-            >
-              <span className="loading-screen__prompt">{'>'}</span>{' '}
-              <span className="loading-screen__label">{line.label}</span>
-              {line.dots && (
-                <span className="loading-screen__dots"> {line.dots} </span>
-              )}
-              {line.status && (
-                <span className="loading-screen__status">{line.status}</span>
-              )}
+        {showBoot && (
+          <>
+            <div className="loading-screen__terminal" role="status" aria-live="polite">
+              {BOOT_LINES.map((line, i) => (
+                <div
+                  key={line.label}
+                  className={`loading-screen__line is-${line.kind}`}
+                  style={{ animationDelay: `${i * LINE_DELAY_MS}ms` }}
+                >
+                  <span className="loading-screen__prompt">{'>'}</span>{' '}
+                  <span className="loading-screen__label">{line.label}</span>
+                  {line.dots && (
+                    <span className="loading-screen__dots"> {line.dots} </span>
+                  )}
+                  {line.status && (
+                    <span className="loading-screen__status">{line.status}</span>
+                  )}
+                </div>
+              ))}
+              <div
+                className="loading-screen__line is-cursor"
+                style={{ animationDelay: `${BOOT_LINES.length * LINE_DELAY_MS}ms` }}
+              >
+                <span className="loading-screen__prompt">{'>'}</span>{' '}
+                <span className="loading-screen__blink">_</span>
+              </div>
             </div>
-          ))}
-          <div
-            className="loading-screen__line is-cursor"
-            style={{ animationDelay: `${BOOT_LINES.length * LINE_DELAY_MS}ms` }}
-          >
-            <span className="loading-screen__prompt">{'>'}</span>{' '}
-            <span className="loading-screen__blink">_</span>
-          </div>
-        </div>
 
-        <TopographicCard />
+            <TopographicCard />
+          </>
+        )}
+
+        {showPrompt && (
+          <MobileWarningPrompt
+            onContinue={handleContinue}
+            onDecline={() => setPhase('declined')}
+          />
+        )}
+
+        {showDeclined && (
+          <MobileDeclinedPanel onContinueAnyway={handleContinue} />
+        )}
       </div>
     </div>
   )

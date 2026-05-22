@@ -8,9 +8,11 @@
 .page-section--blank {
   position: relative;
   width: 100%;
-  /* ~3.2 vp for projects scroll-through + ~1 vp for horizontal pan */
-  height: 420vh;
-  height: 420svh;
+  /* Base/fallback only — actual height is computed by JS (PageBlank.jsx)
+   * so the projects shell always gets enough scroll runway to translate
+   * through its full content regardless of viewport / stacking. */
+  height: 460vh;
+  height: 460svh;
   background: #5227ff;
   overflow: visible;
   isolation: isolate;
@@ -509,6 +511,87 @@
 
   .project-card__shot:hover {
     transform: scale(1.01);
+  }
+
+  .projects-shell {
+    width: min(92vw, 720px);
+    padding: clamp(80px, 12vh, 120px) 0 clamp(60px, 9vh, 100px);
+    gap: clamp(60px, 10vh, 100px);
+  }
+
+  .projects-list {
+    gap: clamp(60px, 10vh, 100px);
+  }
+}
+
+@media (max-width: 640px) {
+  .projects-shell {
+    width: min(92vw, 480px);
+    padding: clamp(70px, 11vh, 100px) 0 clamp(50px, 8vh, 80px);
+    gap: clamp(48px, 8vh, 72px);
+  }
+
+  .projects-header__title {
+    font-size: clamp(2.2rem, 9vw, 3rem);
+  }
+
+  .projects-header__lede {
+    font-size: clamp(0.95rem, 3.6vw, 1.05rem);
+  }
+
+  .project-card__inner {
+    padding: 22px;
+    gap: 24px;
+  }
+
+  .project-card__title {
+    font-size: clamp(2rem, 8vw, 2.6rem);
+  }
+
+  .project-card__subtitle {
+    font-size: clamp(0.9rem, 3.4vw, 1rem);
+  }
+
+  .project-card__highlights li {
+    padding: 14px 14px 14px 18px;
+  }
+
+  .project-card__highlights h4 {
+    font-size: clamp(0.95rem, 3.4vw, 1.05rem);
+  }
+
+  .project-card__highlights p {
+    font-size: clamp(0.85rem, 3.2vw, 0.95rem);
+  }
+
+  .project-card__stack li {
+    font-size: clamp(0.7rem, 2.6vw, 0.78rem);
+    padding: 5px 10px;
+  }
+
+  /* Contact panel — tighter on small screens */
+  .contact-shell {
+    width: min(92vw, 420px);
+    padding: clamp(36px, 7vw, 56px) clamp(24px, 6vw, 40px);
+    gap: clamp(20px, 4vh, 32px);
+  }
+
+  .contact-shell__title {
+    font-size: clamp(2rem, 9vw, 3rem);
+  }
+
+  .contact-shell__message {
+    font-size: clamp(0.92rem, 3.6vw, 1.02rem);
+    line-height: 1.55;
+  }
+
+  .contact-shell__socials {
+    gap: 10px;
+  }
+
+  .contact-shell__social-link {
+    padding: 10px 16px;
+    font-size: clamp(0.78rem, 3vw, 0.86rem);
   }
 }
 

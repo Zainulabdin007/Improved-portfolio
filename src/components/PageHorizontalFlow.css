@@ -12,13 +12,31 @@
 .page-section--hflow {
   position: relative;
   width: 100%;
-  /* 5 phases: rise (~0.8vp) + pan1 (~0.8vp) + spin (~2.8vp) +
-     pan2 (~0.8vp) + 3 experience slides (~3 vp) ≈ 8 vp of scroll */
-  height: 900vh;
-  height: 900svh;
+  /* 5 phases: rise (~1vp) + pan1 (~1vp) + spin (~3.5vp) +
+     pan2 (~1vp) + 3 experience slides (~4 vp) ≈ 11 vp of scroll.
+     Lengthened from 900svh so each phase has more breathing room
+     under the heavier scrub. */
+  height: 1100vh;
+  height: 1100svh;
   background: #050505;
   overflow: visible;
   isolation: isolate;
+}
+
+@media (max-width: 900px) {
+  .page-section--hflow {
+    /* Trim slightly on tablet/mobile so the section doesn't feel
+       like a never-ending tunnel on a tall portrait viewport. */
+    height: 950vh;
+    height: 950svh;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-section--hflow {
+    height: 820vh;
+    height: 820svh;
+  }
 }
 
 /* Wave dividers — dark so they read as a frame above/below the section */
@@ -476,10 +494,15 @@
     grid-template-columns: 1fr;
     gap: clamp(24px, 4vw, 40px);
     align-items: start;
+    width: min(96vw, 720px);
   }
 
   .hflow-slides {
-    height: clamp(480px, 70svh, 620px);
+    height: clamp(420px, 64svh, 560px);
+  }
+
+  .hflow-slide {
+    padding: clamp(22px, 4vw, 36px);
   }
 }
 
@@ -490,8 +513,8 @@
 @media (max-width: 820px) {
   .hflow-card__inner {
     grid-template-columns: 1fr;
-    gap: 32px;
-    padding: clamp(36px, 7vw, 56px) clamp(28px, 6vw, 44px);
+    gap: 28px;
+    padding: clamp(32px, 6vw, 48px) clamp(24px, 5vw, 40px);
     justify-items: center;
   }
 
@@ -502,15 +525,111 @@
   .hflow-text {
     text-align: left;
   }
+
+  /* Tile grid shrinks: smaller tiles, smaller gap so 8x4 still fits */
+  .hflow-grid {
+    gap: clamp(6px, 1.2vmin, 12px);
+    height: min(88svh, 720px);
+  }
+
+  .hflow-tile__svg,
+  .hflow-tile__icon {
+    max-width: 44px;
+    max-height: 44px;
+  }
 }
 
 @media (max-width: 640px) {
+  .hflow-card {
+    width: min(94vw, 480px);
+  }
+
+  .hflow-card__inner {
+    padding: 28px 22px;
+    gap: 22px;
+  }
+
   .hflow-photo {
-    max-width: 260px;
+    max-width: 220px;
   }
 
   .hflow-text__name {
     font-size: clamp(2rem, 10vw, 2.8rem);
+    margin-bottom: 16px;
+  }
+
+  .hflow-text p {
+    font-size: clamp(0.92rem, 3.4vw, 1.02rem);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+
+  /* On mobile, the panel is only ~100svh so we need to make sure the
+     stacked card actually fits. Cap the height and allow internal
+     scroll on the inner content if the device is really tight. */
+  .hflow-panel--about {
+    padding: clamp(70px, 12vh, 120px) 16px clamp(40px, 6vh, 60px);
+    align-items: flex-start;
+  }
+
+  /* Tile grid: keep 8 columns but shrink dramatically and reduce the
+     reserved height so the computer model + tiles fit on a phone. */
+  .hflow-grid {
+    gap: 5px;
+    height: min(78svh, 580px);
+    width: min(96vw, 420px);
+  }
+
+  .hflow-tile__svg,
+  .hflow-tile__icon {
+    max-width: 28px;
+    max-height: 28px;
+    width: 60%;
+    height: 60%;
+  }
+
+  .hflow-tile {
+    border-radius: clamp(6px, 1.4vw, 12px);
+  }
+
+  /* Dino canvas shrinks on small phones */
+  .hflow-dino-stage {
+    width: clamp(220px, 60vw, 360px);
+    height: clamp(110px, 16svh, 170px);
+  }
+
+  /* Experience: keep two-paragraph header tight */
+  .hflow-experience {
+    width: min(94vw, 460px);
+    gap: clamp(20px, 3vh, 30px);
+  }
+
+  .hflow-experience__title {
+    font-size: clamp(2rem, 8vw, 2.8rem);
+  }
+
+  .hflow-slide {
+    padding: 20px 18px;
+    gap: 10px;
+    border-radius: 16px;
+  }
+
+  .hflow-slide__role {
+    font-size: clamp(1.3rem, 5.4vw, 1.7rem);
+  }
+
+  .hflow-slide__bullets {
+    padding-left: 0.9rem;
+    gap: 8px;
+  }
+
+  .hflow-slide__bullets li {
+    font-size: clamp(0.84rem, 3.3vw, 0.94rem);
+    line-height: 1.5;
+  }
+
+  .hflow-slides {
+    height: clamp(380px, 58svh, 480px);
   }
 }
 

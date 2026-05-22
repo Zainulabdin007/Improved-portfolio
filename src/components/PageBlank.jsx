@@ -114,6 +114,9 @@ const PROJECTS = [
 
 /* After ~78% of section scroll (projects content), pan left to contact */
 const PAN_START = 0.78
+/* Extra px reserved above the pan window so the slide-in feels deliberate
+ * under the heavier scrub. */
+const PAN_HEIGHT_PX = 900
 
 function useReveal() {
   const ref = useRef(null)
@@ -209,10 +212,26 @@ export default function PageBlank() {
     const shell = shellRef.current
     if (!section || !track || !shell) return
 
+    /*
+     * Compute the section's pixel height dynamically so the projects shell
+     * always gets enough scroll runway. Without this, on a tall mobile
+     * portrait viewport the stacked project cards exceeded the available
+     * scroll distance and content was skipped past in a blink.
+     */
     const measure = () => {
       const pin = section.querySelector('.projects-pin')
       const pinH = pin?.clientHeight ?? window.innerHeight
-      return Math.max(0, shell.scrollHeight - pinH)
+      const maxScroll = Math.max(0, shell.scrollHeight - pinH)
+
+      /* Total scroll required:
+       *   pinH                         — initial sticky window
+       * + maxScroll / PAN_START        — scroll needed to translate shell
+       *                                  through its content in 0..PAN_START
+       * + PAN_HEIGHT_PX                — explicit pan runway after PAN_START
+       */
+      const sectionHeight = pinH + maxScroll / PAN_START + PAN_HEIGHT_PX
+      section.style.height = `${Math.round(sectionHeight)}px`
+      return maxScroll
     }
 
     let maxScroll = measure()
@@ -221,7 +240,7 @@ export default function PageBlank() {
       trigger: section,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 0.4,
+      scrub: 1.1,
       onUpdate: (self) => {
         const p = self.progress
 
@@ -239,14 +258,34 @@ export default function PageBlank() {
       },
     })
 
+    /* Re-measure whenever the page reflows. Images loading late or font
+     * swaps can change shell.scrollHeight after the first paint, so we
+     * also observe with ResizeObserver for surgical accuracy. */
     const onResize = () => {
       maxScroll = measure()
       ScrollTrigger.refresh()
     }
     window.addEventListener('resize', onResize)
+    window.addEventListener('orientationchange', onResize)
+
+    const ro = new ResizeObserver(() => {
+      maxScroll = measure()
+      ScrollTrigger.refresh()
+    })
+    ro.observe(shell)
+
+    /* If any images inside the shell load late, re-measure when they do. */
+    const imgs = Array.from(shell.querySelectorAll('img'))
+    imgs.forEach((img) => {
+      if (img.complete) return
+      img.addEventListener('load', onResize, { once: true })
+      img.addEventListener('error', onResize, { once: true })
+    })
 
     return () => {
       window.removeEventListener('resize', onResize)
+      window.removeEventListener('orientationchange', onResize)
+      ro.disconnect()
       trigger.kill()
     }
   }, [])

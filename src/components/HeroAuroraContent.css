@@ -7,10 +7,12 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 130px 24px 80px;
+  padding: clamp(110px, 18vh, 150px) clamp(16px, 4vw, 32px)
+    clamp(48px, 8vh, 80px);
   color: #f5f5f7;
   font-family: 'Space Grotesk', 'Inter', 'Helvetica Neue', sans-serif;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .hero-aurora > * {
@@ -29,11 +31,12 @@
 
 .hero-aurora__name {
   font-family: 'Space Grotesk', 'Inter', 'Helvetica Neue', sans-serif;
-  font-size: clamp(3rem, 13vw, 10rem);
+  font-size: clamp(2.6rem, 12vw, 9rem);
   font-weight: 700;
   letter-spacing: -0.035em;
   line-height: 0.95;
   margin: 0 0 26px;
+  max-width: 100%;
 }
 
 .hero-aurora__location {
@@ -138,19 +141,55 @@
 
 @media (max-width: 640px) {
   .hero-aurora {
-    padding: 110px 20px 60px;
+    padding: 100px 16px 48px;
+    justify-content: flex-start;
+    padding-top: clamp(96px, 16vh, 130px);
+  }
+
+  .hero-aurora__greeting {
+    margin: 0 0 12px;
+    letter-spacing: 0.28em;
+  }
+
+  .hero-aurora__name {
+    font-size: clamp(2.2rem, 13vw, 4rem);
+    margin: 0 0 18px;
+  }
+
+  .hero-aurora__location {
+    margin: 0 0 18px;
+    padding: 5px 12px;
+    font-size: 0.78rem;
   }
 
   .hero-aurora__bio {
     font-size: 1rem;
+    margin: 0 0 24px;
+    line-height: 1.4;
   }
 
   .hero-aurora__socials {
-    gap: 18px;
+    gap: 14px;
+    margin: 0 0 22px;
   }
 
   .hero-aurora__social-link {
     width: 38px;
     height: 38px;
+  }
+
+  .hero-aurora__resume {
+    padding: 11px 30px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-aurora__name {
+    font-size: 2rem;
+  }
+
+  .hero-aurora__bio {
+    font-size: 0.92rem;
   }
 }

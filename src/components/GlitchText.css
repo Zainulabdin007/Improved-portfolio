@@ -7,6 +7,16 @@
   margin: 0 auto;
   user-select: none;
   cursor: pointer;
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  /* Allow the name to break to two lines on small phones so the glitch
+   * doesn't overflow the hero column. */
+  .glitch {
+    white-space: normal;
+    word-break: keep-all;
+  }
 }
 
 .glitch::after,

@@ -170,11 +170,13 @@ const SPIN_END = 0.55
 const PAN2_END = 0.65
 
 // Each slide animates through enter → dwell → exit windows on global progress.
-// The last slide has no exit so it stays visible at the bottom of the section.
+// Windows are widened slightly so the heavier scrub feels intentional rather
+// than rushed. The last slide has no exit so it stays visible at the bottom
+// of the section.
 const SLIDES = [
-  { enterStart: 0.65, enterEnd: 0.69, exitStart: 0.74, exitEnd: 0.78 },
-  { enterStart: 0.78, enterEnd: 0.82, exitStart: 0.86, exitEnd: 0.9 },
-  { enterStart: 0.9, enterEnd: 0.93, exitStart: null, exitEnd: null },
+  { enterStart: 0.65, enterEnd: 0.71, exitStart: 0.74, exitEnd: 0.80 },
+  { enterStart: 0.80, enterEnd: 0.84, exitStart: 0.87, exitEnd: 0.92 },
+  { enterStart: 0.92, enterEnd: 0.96, exitStart: null, exitEnd: null },
 ]
 
 const EXPERIENCES = [
@@ -257,7 +259,7 @@ export default function PageHorizontalFlow() {
       trigger: section,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 0.4,
+      scrub: 1.1,
       onUpdate: (self) => {
         const p = self.progress
         scrollActiveRef.current = performance.now()

@@ -73,19 +73,38 @@
   .hero__hand {
     top: 54%;
     width: min(48vw, 240px);
-    height: min(60vh, 440px);
+    height: min(58vh, 420px);
   }
 
   .hero__hand--left {
     left: -9vw;
-    top: 48%;
-    transform: translate(calc((1 - var(--hand-progress)) * -120vw), -44%) scale(2.2);
+    top: 50%;
+    transform: translate(calc((1 - var(--hand-progress)) * -120vw), -44%) scale(2);
   }
 
   .hero__hand--right {
     right: -3vw;
-    top: 48%;
-    transform: translate(calc((1 - var(--hand-progress)) * 120vw), -42%) scale(2.2);
+    top: 50%;
+    transform: translate(calc((1 - var(--hand-progress)) * 120vw), -42%) scale(2);
+  }
+}
+
+@media (max-width: 380px) {
+  /* Pull the hands tighter on tiny phones so they cradle the smaller
+   * sphere rather than swallowing it. */
+  .hero__hand {
+    width: min(54vw, 210px);
+    height: min(54vh, 360px);
+  }
+
+  .hero__hand--left {
+    left: -10vw;
+    transform: translate(calc((1 - var(--hand-progress)) * -120vw), -44%) scale(1.7);
+  }
+
+  .hero__hand--right {
+    right: -4vw;
+    transform: translate(calc((1 - var(--hand-progress)) * 120vw), -42%) scale(1.7);
   }
 }
 
