@@ -27,3 +27,40 @@ body {
     -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue',
     Helvetica, Arial, sans-serif;
 }
+
+/* webring.ca — fixed top-right, same tier as the nav hotbar */
+.site-webring {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 100;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  min-height: 56px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: saturate(1.25) blur(22px);
+  -webkit-backdrop-filter: saturate(1.25) blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.06),
+    0 10px 40px rgba(0, 0, 0, 0.16),
+    0 24px 56px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --webring-size: 1.05rem;
+  --webring-color: #0a0a0a;
+  --webring-accent: #af272f;
+}
+
+@media (max-width: 640px) {
+  .site-webring {
+    top: 16px;
+    right: 16px;
+    min-height: 52px;
+    padding: 8px 14px;
+    --webring-size: 0.95rem;
+  }
+}

@@ -183,14 +183,6 @@
   box-shadow: 0 8px 28px rgba(255, 159, 252, 0.2);
 }
 
-.contact-shell__webring {
-  margin-top: clamp(20px, 3vh, 32px);
-  display: flex;
-  justify-content: center;
-  --webring-color: rgba(245, 245, 247, 0.75);
-  --webring-accent: #ff9ffc;
-}
-
 .contact-shell__rights {
   margin: 0;
   padding-top: clamp(16px, 2vh, 24px);
