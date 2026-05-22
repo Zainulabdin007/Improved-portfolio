@@ -6,23 +6,10 @@
   padding: 0;
 }
 
-:root {
-  --scrollbar-size: 12px;
-  --scrollbar-track: rgba(0, 0, 0, 0.06);
-  --scrollbar-thumb: #5227ff;
-  --scrollbar-thumb-mid: #b497cf;
-  --scrollbar-thumb-end: #ff9ffc;
-}
-
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: auto;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 html,
@@ -34,59 +21,11 @@ body,
 
 body {
   overflow-x: hidden;
-  overflow-y: visible;
+  overflow-y: auto;
   background: #ffffff;
   font-family:
     -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue',
     Helvetica, Arial, sans-serif;
-}
-
-/* Viewport scrollbar — must target html (document scroll), not body */
-html::-webkit-scrollbar {
-  width: var(--scrollbar-size);
-  height: var(--scrollbar-size);
-}
-
-html::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-  border-radius: 100px;
-  margin: 8px 2px;
-}
-
-html::-webkit-scrollbar-thumb {
-  border-radius: 100px;
-  border: 3px solid transparent;
-  background-clip: padding-box;
-  background: linear-gradient(
-    180deg,
-    var(--scrollbar-thumb) 0%,
-    var(--scrollbar-thumb-mid) 50%,
-    var(--scrollbar-thumb-end) 100%
-  );
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.4) inset,
-    0 2px 10px rgba(82, 39, 255, 0.35);
-  min-height: 64px;
-}
-
-html::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    180deg,
-    #6b3dff 0%,
-    #c9b0e0 50%,
-    #ffb8fd 100%
-  );
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset,
-    0 4px 16px rgba(82, 39, 255, 0.45);
-}
-
-html::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(180deg, #3d1acc 0%, #ff7dfa 100%);
-}
-
-html::-webkit-scrollbar-corner {
-  background: transparent;
 }
 
 /* webring.ca — fixed top-right, same tier as the nav hotbar */
