@@ -97,6 +97,43 @@
   color: #000;
 }
 
+.navbar__music {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  margin: 0 4px 0 2px;
+  padding: 0;
+  border: none;
+  border-radius: 22px;
+  background: transparent;
+  color: #0a0a0a;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.navbar__music:hover {
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.navbar__music:active {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.navbar__music--playing {
+  color: #af272f;
+}
+
+.navbar__music svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
 @media (max-width: 640px) {
   .navbar-wrap {
     padding: 16px 16px 0;
@@ -119,5 +156,16 @@
   .navbar__link {
     padding: 11px 18px;
     font-size: 14px;
+  }
+
+  .navbar__music {
+    width: 40px;
+    height: 40px;
+    margin: 0 2px 0 0;
+  }
+
+  .navbar__music svg {
+    width: 20px;
+    height: 20px;
   }
 }
