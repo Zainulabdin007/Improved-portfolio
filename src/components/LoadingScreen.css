@@ -2,28 +2,60 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 6vw;
-  background: #050505;
-  color: #f5f5f7;
-  font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Menlo', monospace;
-  opacity: 1;
-  transition: opacity 0.6s ease;
   pointer-events: auto;
   overflow: hidden;
+  background: transparent;
+  color: #f5f5f7;
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Menlo', monospace;
+}
+
+.loading-screen.is-revealing {
+  pointer-events: none;
 }
 
 .loading-screen.is-done {
-  opacity: 0;
   pointer-events: none;
   visibility: hidden;
 }
 
-.loading-screen__scanlines {
+/* ----- Split-door reveal ----- */
+
+.loading-screen__doors {
   position: absolute;
   inset: 0;
+}
+
+.loading-screen__door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  overflow: hidden;
+  background: #050505;
+  will-change: transform;
+  transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.loading-screen__door--left {
+  left: 0;
+}
+
+.loading-screen__door--right {
+  right: 0;
+}
+
+.loading-screen.is-revealing .loading-screen__door--left {
+  transform: translateX(-100%);
+}
+
+.loading-screen.is-revealing .loading-screen__door--right {
+  transform: translateX(100%);
+}
+
+.loading-screen__door-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   background-image: repeating-linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.035) 0,
@@ -35,16 +67,34 @@
   pointer-events: none;
 }
 
-.loading-screen::after {
-  content: '';
+.loading-screen__door-vignette {
   position: absolute;
   inset: 0;
+  z-index: 2;
   background: radial-gradient(
     ellipse at center,
-    transparent 30%,
-    rgba(0, 0, 0, 0.7) 100%
+    transparent 28%,
+    rgba(0, 0, 0, 0.72) 100%
   );
   pointer-events: none;
+}
+
+.loading-screen__door-viewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 6vw;
+  box-sizing: border-box;
+  z-index: 0;
+}
+
+.loading-screen__door-viewport--right {
+  left: -50vw;
 }
 
 .loading-screen__inner {
@@ -56,43 +106,42 @@
   gap: clamp(36px, 7vw, 96px);
   max-width: 1080px;
   width: 100%;
+  flex-shrink: 0;
 }
 
 /* ----- Terminal ----- */
 
 .loading-screen__terminal-wrap {
   flex: 1 1 auto;
-  max-width: 560px;
+  max-width: 640px;
+  width: min(100%, 640px);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 
+/* Lines print from the top down — no manual scroll */
 .loading-screen__terminal {
-  max-height: min(58vh, 520px);
-  overflow-y: auto;
-  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: min(68vh, 640px);
+  max-height: min(68vh, 640px);
+  overflow: hidden;
+  padding: 12px 4px 8px;
   font-size: clamp(0.72rem, 0.95vw, 0.9rem);
-  line-height: 1.85;
+  line-height: 1.72;
   letter-spacing: 0.02em;
   white-space: pre;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(232, 255, 54, 0.35) transparent;
-}
-
-.loading-screen__terminal::-webkit-scrollbar {
-  width: 5px;
-}
-
-.loading-screen__terminal::-webkit-scrollbar-thumb {
-  background: rgba(232, 255, 54, 0.35);
-  border-radius: 99px;
 }
 
 .loading-screen__line {
+  flex-shrink: 0;
   opacity: 0;
-  transform: translateY(2px);
-  animation: terminal-print 0.32s ease forwards;
+  transform: translateY(6px);
+  animation-name: terminal-print;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: forwards;
 }
 
 .loading-screen__prompt {
@@ -108,6 +157,10 @@
 }
 
 .loading-screen__status {
+  opacity: 0;
+  animation-name: terminal-status-in;
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
   color: #66ff9c;
   font-weight: 500;
   text-shadow: 0 0 8px rgba(102, 255, 156, 0.35);
@@ -128,6 +181,10 @@
   margin-top: 10px;
 }
 
+.loading-screen__line.is-subheader:first-child {
+  margin-top: 0;
+}
+
 .loading-screen__line.is-subheader .loading-screen__label {
   color: rgba(232, 255, 54, 0.72);
   letter-spacing: 0.12em;
@@ -142,9 +199,13 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-self: flex-start;
+  width: min(72%, 460px);
+  max-width: 460px;
 }
 
 .loading-screen__progress-track {
+  width: 100%;
   height: 3px;
   border-radius: 99px;
   background: rgba(245, 245, 247, 0.1);
@@ -198,6 +259,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes terminal-status-in {
+  from {
+    opacity: 0;
+    transform: translateX(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
@@ -274,7 +346,7 @@
 
 /* ----- Mobile viewport gate ----- */
 
-.loading-screen.is-mobile-gate .loading-screen__inner {
+.loading-screen__inner.is-mobile-gate {
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -403,13 +475,23 @@
 /* ----- Responsive ----- */
 
 @media (max-width: 768px) {
-  .loading-screen {
+  .loading-screen__door-viewport {
     padding: 60px 5vw;
   }
 
   .loading-screen__inner {
     flex-direction: column;
     gap: 36px;
+  }
+
+  .loading-screen__terminal-wrap {
+    max-width: 100%;
+  }
+
+  .loading-screen__terminal {
+    min-height: min(52vh, 480px);
+    max-height: min(52vh, 480px);
+    line-height: 1.65;
   }
 
   .loading-screen__map {
@@ -427,7 +509,29 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .loading-screen__door {
+    transition: opacity 0.45s ease;
+  }
+
+  .loading-screen.is-revealing .loading-screen__door--left,
+  .loading-screen.is-revealing .loading-screen__door--right {
+    transform: none;
+    opacity: 0;
+  }
+
+  .loading-screen__terminal {
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
   .loading-screen__line {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .loading-screen__status {
     animation: none;
     opacity: 1;
     transform: none;
