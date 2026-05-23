@@ -5,6 +5,9 @@ function scrollToNextSection() {
   document.getElementById('page-2')?.scrollIntoView({ behavior: 'smooth' })
 }
 
+/** Optical center of the navbar note — nudge left vs. button box center. */
+const MUSIC_HINT_OFFSET_X = -1
+
 function quadPoint(x1, y1, cx, cy, x2, y2, t) {
   const mt = 1 - t
   return {
@@ -33,28 +36,29 @@ export default function HeroHints() {
       if (!onHero) return
 
       const musicRect = musicBtn.getBoundingClientRect()
+      const noteEl = musicBtn.querySelector('svg')
+      const noteRect = noteEl ? noteEl.getBoundingClientRect() : musicRect
+      const anchorX =
+        noteRect.left + noteRect.width / 2 + MUSIC_HINT_OFFSET_X
       const gap = 24
-      const labelLeft = musicRect.left + musicRect.width / 2
       const labelTop = musicRect.bottom + gap
 
       setMusicLabelStyle({
-        left: `${labelLeft}px`,
+        left: `${anchorX}px`,
         top: `${labelTop}px`,
         transform: 'translateX(-50%)',
       })
 
       requestAnimationFrame(() => {
         const labelRect = label.getBoundingClientRect()
-        const noteEl = musicBtn.querySelector('svg')
-        const targetRect = noteEl ? noteEl.getBoundingClientRect() : musicRect
 
         // Tail: top-center of the “Music” hint label
         const x1 = labelRect.left + labelRect.width / 2
         const y1 = labelRect.top
 
-        // Tip target: center of the note icon on the navbar hotbar
-        const x2 = targetRect.left + targetRect.width / 2
-        const y2 = targetRect.top + targetRect.height / 2
+        // Tip target: optical center of the note icon
+        const x2 = anchorX
+        const y2 = noteRect.top + noteRect.height / 2
 
         const dy = y1 - y2
         const cx = (x1 + x2) / 2
