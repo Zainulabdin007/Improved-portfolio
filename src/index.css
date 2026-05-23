@@ -11,7 +11,9 @@ html {
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: auto;
 
-  /* Reserve scrollbar gutter so the layout doesn't shift when content jumps */
+  /* Uniform scale vs 1920×1080 reference (set in viewportVars.js) */
+  --ui-scale: 1;
+
   scrollbar-gutter: stable;
 
   /* Firefox — thin auto-hiding-style track */

@@ -1,8 +1,5 @@
 /*
- * Hand layout vars (--hand-width, --hand-scale, --hand-travel, etc.) are
- * computed in HeroHands.jsx from the actual .hero__stage size.
- * Targets laptop/desktop — same footprint across screen sizes.
- *
+ * Hand sizes are set in JS from viewportVars.js (reference 1920×1080 × --ui-scale).
  * --hand-progress: 0 → off-screen | 1 → resting beside the sphere
  */
 
@@ -15,14 +12,14 @@
 
 .hero__hand {
   --hand-progress: 0;
-  --hand-width: min(38vw, 400px);
-  --hand-height: min(75vh, 760px);
-  --hand-scale: 3;
-  --hand-travel: 120vw;
+  --hand-width: var(--ref-hand-w, 400px);
+  --hand-height: var(--ref-hand-h, 760px);
+  --hand-scale: var(--ref-hand-mult, 3);
+  --hand-travel: calc(1920px * 1.2 * var(--ui-scale, 1));
   --hand-y-left: -46%;
   --hand-y-right: -44%;
-  --hand-edge-left: -4vw;
-  --hand-edge-right: -1vw;
+  --hand-edge-left: calc(-1920px * 0.04 * var(--ui-scale, 1));
+  --hand-edge-right: calc(-1920px * 0.01 * var(--ui-scale, 1));
 
   position: absolute;
   top: 46%;

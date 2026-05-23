@@ -2,6 +2,7 @@ import { Suspense, useLayoutEffect, useRef } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import AnimatedSphere from './AnimatedSphere'
 import HeroHands from './HeroHands'
+import { readUiScale, onViewportScaleChange } from '../utils/viewportVars'
 import './HeroScene.css'
 
 function SceneLights() {
@@ -15,8 +16,8 @@ function SceneLights() {
   )
 }
 
-/** Keep aspect ratio correct on resize — camera distance/FOV stay fixed. */
-function AspectCamera({ stageRef }) {
+/** Match sphere framing to ui-scale (designed @ 1920×1080). */
+function ScaledCamera({ stageRef }) {
   const { camera } = useThree()
 
   useLayoutEffect(() => {
@@ -27,14 +28,23 @@ function AspectCamera({ stageRef }) {
       const w = stage.clientWidth
       const h = stage.clientHeight
       if (w <= 0 || h <= 0) return
+
+      const ui = readUiScale()
+      camera.position.set(0, 0, 5.8 / ui)
+      camera.fov = 40
       camera.aspect = w / h
+      camera.lookAt(0, 0, 0)
       camera.updateProjectionMatrix()
     }
 
     update()
     const ro = new ResizeObserver(update)
     ro.observe(stage)
-    return () => ro.disconnect()
+    const off = onViewportScaleChange(update)
+    return () => {
+      ro.disconnect()
+      off()
+    }
   }, [camera, stageRef])
 
   return null
@@ -61,7 +71,7 @@ function HeroCanvas({ stageRef }) {
         camera.updateProjectionMatrix()
       }}
     >
-      <AspectCamera stageRef={stageRef} />
+      <ScaledCamera stageRef={stageRef} />
       <Suspense fallback={null}>
         <SceneLights />
         <AnimatedSphere />

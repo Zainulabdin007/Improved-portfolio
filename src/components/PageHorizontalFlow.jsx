@@ -36,6 +36,7 @@ import { TbCursorText } from 'react-icons/tb'
 import HeroWaveDivider from './HeroWaveDivider'
 import Waves from './Waves'
 import TopoPattern from './TopoPattern'
+import { readUiScale } from '../utils/viewportVars'
 import './PageHorizontalFlow.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -267,7 +268,8 @@ export default function PageHorizontalFlow() {
         if (p < RISE_END) {
           // Phase 0 — about card rises into view
           const t = easeOut(p / RISE_END)
-          card.style.setProperty('--rise', `${(1 - t) * 120}vh`)
+          const riseVh = 120 * readUiScale()
+          card.style.setProperty('--rise', `${(1 - t) * riseVh}vh`)
           card.style.setProperty('--rise-opacity', String(t))
           track.style.transform = 'translate3d(0, 0, 0)'
           rotationRef.current = 0

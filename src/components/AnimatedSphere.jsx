@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Center, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { GLB_URL } from '../constants'
+import { onViewportScaleChange, readUiScale } from '../utils/viewportVars'
 
 useGLTF.preload(GLB_URL)
 
@@ -29,10 +30,18 @@ export default function AnimatedSphere() {
   const spinAngle = useRef(0)
   const animRef = useRef()
   const mixerRef = useRef(null)
+  const [uiScale, setUiScale] = useState(1)
   const { scene, animations } = useGLTF(GLB_URL)
 
   const model = useMemo(() => scene.clone(true), [scene])
   const morphClip = useMemo(() => buildMorphClip(animations), [animations])
+  const modelScale = MODEL_SCALE * uiScale
+
+  useEffect(() => {
+    const sync = () => setUiScale(readUiScale())
+    sync()
+    return onViewportScaleChange(sync)
+  }, [])
 
   useEffect(() => {
     model.traverse((child) => {
@@ -89,7 +98,7 @@ export default function AnimatedSphere() {
   })
 
   return (
-    <group scale={MODEL_SCALE}>
+    <group scale={modelScale}>
       <group ref={verticalSpinRef}>
         <group rotation={[AXIAL_TILT, 0, 0]}>
           <Center precise>
