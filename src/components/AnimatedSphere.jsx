@@ -9,7 +9,7 @@ useGLTF.preload(GLB_URL)
 
 /** Rotation around the vertical (Y) world axis — planet pole spin */
 const VERTICAL_SPIN_SPEED = 0.32
-const MODEL_SCALE = 0.82
+const MODEL_SCALE = 1.122 /* 1.181 × 0.95 */
 const ANIMATION_SPEED = 1.85
 /** Tilts the sphere so Y-axis spin is visible (symmetric blobs hide pure Y rotation) */
 const AXIAL_TILT = 0.42
