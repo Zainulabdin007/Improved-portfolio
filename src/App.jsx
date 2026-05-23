@@ -3,6 +3,7 @@ import NavBar from './components/NavBar'
 import AuroraSection from './components/AuroraSection'
 import HeroAuroraContent from './components/HeroAuroraContent'
 import HeroWaveDivider from './components/HeroWaveDivider'
+import HeroHints from './components/HeroHints'
 import LoadingScreen from './components/LoadingScreen'
 import PageTwo from './components/PageTwo'
 import PageHorizontalFlow from './components/PageHorizontalFlow'
@@ -21,6 +22,7 @@ export default function App() {
           <section id="home" className="hero-viewport page-section--aurora-first">
             <AuroraSection />
             <HeroAuroraContent />
+            <HeroHints />
             <HeroWaveDivider placement="hero-end" />
           </section>
           <PageTwo />

@@ -462,6 +462,11 @@
   color: rgba(245, 245, 247, 0.92);
 }
 
+.hflow-slide__bullets strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
 .hflow-slide__bullets li::marker {
   color: rgba(251, 146, 60, 0.85);
 }

@@ -88,6 +88,7 @@ export default function NavBar() {
           ))}
         </ul>
         <button
+          id="navbar-music"
           type="button"
           className={`navbar__music${playing ? ' navbar__music--playing' : ''}`}
           onClick={toggleMusic}

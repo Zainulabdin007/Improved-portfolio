@@ -186,6 +186,17 @@ function experienceExpProgress(p) {
   return easeInOut(linear / EXP_ENTER_EASE_FRAC) * EXP_ENTER_EASE_FRAC
 }
 
+/** Wrap `**like this**` segments in <strong> for experience bullet highlights. */
+function renderBoldSegments(text) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    }
+    return part
+  })
+}
+
 const EXPERIENCES = [
   {
     title: 'Information Technology Intern',
@@ -193,9 +204,9 @@ const EXPERIENCES = [
     dates: 'Jul 2024 — Aug 2024',
     location: 'Mississauga, ON',
     bullets: [
-      'Installed, configured, and maintained desktops, laptops, printers, and mobile devices via Microsoft Intune.',
-      'Troubleshot hardware, software, and peripheral issues — keeping downtime minimal for 500+ students and staff.',
-      'Provided responsive technical assistance, contributing to seamless daily IT operations across the campus.',
+      'Installed, configured, and maintained desktops, laptops, printers, and mobile devices via **Microsoft Intune**.',
+      'Troubleshot **hardware**, **software**, and peripheral issues — keeping downtime minimal for **500+** students and staff.',
+      'Provided responsive **technical assistance**, contributing to seamless daily **IT operations** across the campus.',
     ],
   },
   {
@@ -204,10 +215,10 @@ const EXPERIENCES = [
     dates: 'May 2025 — Dec 2025',
     location: 'Milton, ON',
     bullets: [
-      'Engineered and shipped 6 production full-stack sites in React, HTML/CSS, and JavaScript — dynamic contact forms, interactive galleries, fully responsive nav — collectively serving 1,500+ monthly active users.',
-      'Architected integrations with 3 mission-critical APIs (Stripe, Google Maps, SendGrid), enabling $10K+ in monthly payment processing and automated email workflows at 99% uptime.',
-      'Delivered 5 simultaneous client projects in an agile environment: 200+ commits across 20+ feature branches, mentored 2 designers, and resolved 15+ merge conflicts.',
-      'Drove a 40% performance uplift via WebP compression, lazy loading, and Cloudflare CDN — Lighthouse scores 65 → 86, bounce rates down 15%.',
+      'Engineered and shipped **6** production **full-stack** sites in **React**, **HTML/CSS**, and **JavaScript** — dynamic contact forms, interactive galleries, fully responsive nav — collectively serving **1,500+** monthly active users.',
+      'Architected integrations with **3** mission-critical APIs (**Stripe**, **Google Maps**, **SendGrid**), enabling **$10K+** in monthly payment processing and automated email workflows at **99%** uptime.',
+      'Delivered **5** simultaneous client projects in an **agile** environment: **200+** commits across **20+** feature branches, mentored **2** designers, and resolved **15+** merge conflicts.',
+      'Drove a **40%** performance uplift via **WebP** compression, **lazy loading**, and **Cloudflare CDN** — **Lighthouse** scores **65 → 86**, bounce rates down **15%**.',
     ],
   },
   {
@@ -216,10 +227,10 @@ const EXPERIENCES = [
     dates: 'May 2026 — Present',
     location: 'Kitchener, ON',
     bullets: [
-      'Migrate clinical workstations from the legacy GRHosp domain to the unified WRHN domain, preserving authentication and continuity of care for hospital staff.',
-      'Image and reimage laptops via PXE boot, then configure device permissions and deploy required software for physicians, nurses, and administrative teams.',
-      'Triage and resolve end-to-end hardware and software issues alongside a tight-knit IT team, keeping critical clinical workflows online.',
-      'Operate under strict patient-privacy and healthcare security standards while supporting doctors and staff across multiple departments.',
+      'Migrate clinical workstations from the legacy **GRHosp** domain to the unified **WRHN** domain, preserving authentication and continuity of care for hospital staff.',
+      'Image and reimage laptops via **PXE boot**, then configure device permissions and deploy required software for **physicians**, **nurses**, and administrative teams.',
+      'Triage and resolve end-to-end **hardware** and **software** issues alongside a tight-knit IT team, keeping critical **clinical workflows** online.',
+      'Operate under strict **patient-privacy** and **healthcare security** standards while supporting doctors and staff across multiple departments.',
     ],
   },
 ]
@@ -534,7 +545,7 @@ export default function PageHorizontalFlow() {
                     </header>
                     <ul className="hflow-slide__bullets">
                       {exp.bullets.map((b, j) => (
-                        <li key={j}>{b}</li>
+                        <li key={j}>{renderBoldSegments(b)}</li>
                       ))}
                     </ul>
                   </article>
