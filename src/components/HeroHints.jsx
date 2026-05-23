@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import './HeroHints.css'
 
 function scrollToNextSection() {
@@ -18,84 +18,123 @@ function quadPoint(x1, y1, cx, cy, x2, y2, t) {
 
 export default function HeroHints() {
   const musicLabelRef = useRef(null)
+  const musicTargetRef = useRef(null)
   const [musicPath, setMusicPath] = useState('')
   const [musicVisible, setMusicVisible] = useState(true)
   const [musicLabelStyle, setMusicLabelStyle] = useState(null)
 
+  const updateArrowPath = useCallback(() => {
+    const label = musicLabelRef.current
+    const target = musicTargetRef.current
+    if (!label || !target) return
+
+    const labelRect = label.getBoundingClientRect()
+    if (labelRect.width < 1) return
+
+    const x1 = labelRect.left + labelRect.width / 2
+    const y1 = labelRect.top
+    const x2 = target.anchorX
+    const y2 = target.noteCenterY
+
+    const dy = y1 - y2
+    const cx = (x1 + x2) / 2
+    const cy = y2 + dy * 0.35
+    const arrowReach = 0.72
+    const lineEnd = quadPoint(x1, y1, cx, cy, x2, y2, arrowReach)
+
+    setMusicPath(`M ${x1} ${y1} Q ${cx} ${cy} ${lineEnd.x} ${lineEnd.y}`)
+  }, [])
+
+  const updateMusicHint = useCallback(() => {
+    const home = document.getElementById('home')
+    const musicBtn = document.getElementById('navbar-music')
+    const label = musicLabelRef.current
+    if (!home || !musicBtn || !label) return
+
+    const homeRect = home.getBoundingClientRect()
+    const onHero = homeRect.bottom > 80 && homeRect.top < window.innerHeight * 0.85
+    setMusicVisible(onHero)
+    if (!onHero) {
+      setMusicPath('')
+      return
+    }
+
+    const musicRect = musicBtn.getBoundingClientRect()
+    const noteEl = musicBtn.querySelector('svg')
+    const noteRect = noteEl ? noteEl.getBoundingClientRect() : musicRect
+    const anchorX = noteRect.left + noteRect.width / 2 + MUSIC_HINT_OFFSET_X
+    const gap = 24
+
+    musicTargetRef.current = {
+      anchorX,
+      noteCenterY: noteRect.top + noteRect.height / 2,
+    }
+
+    setMusicLabelStyle({
+      left: `${anchorX}px`,
+      top: `${musicRect.bottom + gap}px`,
+      transform: 'translateX(-50%)',
+    })
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!musicLabelStyle || !musicVisible) return
+    updateArrowPath()
+  }, [musicLabelStyle, musicVisible, updateArrowPath])
+
   useLayoutEffect(() => {
     const home = document.getElementById('home')
     const musicBtn = document.getElementById('navbar-music')
+    const label = musicLabelRef.current
 
-    const update = () => {
-      const label = musicLabelRef.current
-      if (!home || !musicBtn || !label) return
-
-      const homeRect = home.getBoundingClientRect()
-      const onHero = homeRect.bottom > 80 && homeRect.top < window.innerHeight * 0.85
-      setMusicVisible(onHero)
-      if (!onHero) return
-
-      const musicRect = musicBtn.getBoundingClientRect()
-      const noteEl = musicBtn.querySelector('svg')
-      const noteRect = noteEl ? noteEl.getBoundingClientRect() : musicRect
-      const anchorX =
-        noteRect.left + noteRect.width / 2 + MUSIC_HINT_OFFSET_X
-      const gap = 24
-      const labelTop = musicRect.bottom + gap
-
-      setMusicLabelStyle({
-        left: `${anchorX}px`,
-        top: `${labelTop}px`,
-        transform: 'translateX(-50%)',
-      })
-
+    const schedule = () => {
       requestAnimationFrame(() => {
-        const labelRect = label.getBoundingClientRect()
-
-        // Tail: top-center of the “Music” hint label
-        const x1 = labelRect.left + labelRect.width / 2
-        const y1 = labelRect.top
-
-        // Tip target: optical center of the note icon
-        const x2 = anchorX
-        const y2 = noteRect.top + noteRect.height / 2
-
-        const dy = y1 - y2
-        const cx = (x1 + x2) / 2
-        const cy = y2 + dy * 0.35
-
-        // Stop short of the icon — arrow points toward the note but keeps clear space
-        const arrowReach = 0.72
-        const lineEnd = quadPoint(x1, y1, cx, cy, x2, y2, arrowReach)
-
-        setMusicPath(`M ${x1} ${y1} Q ${cx} ${cy} ${lineEnd.x} ${lineEnd.y}`)
+        updateMusicHint()
+        requestAnimationFrame(updateArrowPath)
       })
     }
 
-    const scheduleUpdate = () => {
-      requestAnimationFrame(() => requestAnimationFrame(update))
-    }
+    schedule()
 
-    update()
-    scheduleUpdate()
-    window.addEventListener('resize', scheduleUpdate)
-    window.addEventListener('scroll', scheduleUpdate, { passive: true })
-    window.addEventListener('orientationchange', scheduleUpdate)
+    window.addEventListener('resize', schedule)
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('orientationchange', schedule)
+    window.addEventListener('load', schedule)
 
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(scheduleUpdate) : null
+    document.fonts?.ready?.then(schedule)
+
+    const ro =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null
     const nav = document.querySelector('.navbar')
+    const navWrap = document.querySelector('.navbar-wrap')
     if (ro) {
+      if (home) ro.observe(home)
       if (musicBtn) ro.observe(musicBtn)
       if (nav) ro.observe(nav)
+      if (navWrap) ro.observe(navWrap)
+      if (label) ro.observe(label)
     }
 
+    const htmlClassObserver = new MutationObserver(schedule)
+    htmlClassObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+
+    const bootTimers = [50, 150, 400, 900, 1500].map((ms) =>
+      window.setTimeout(schedule, ms),
+    )
+
     return () => {
-      window.removeEventListener('resize', scheduleUpdate)
-      window.removeEventListener('scroll', scheduleUpdate)
-      window.removeEventListener('orientationchange', scheduleUpdate)
+      window.removeEventListener('resize', schedule)
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('orientationchange', schedule)
+      window.removeEventListener('load', schedule)
       ro?.disconnect()
+      htmlClassObserver.disconnect()
+      bootTimers.forEach((id) => window.clearTimeout(id))
     }
-  }, [])
+  }, [updateMusicHint, updateArrowPath])
 
   return (
     <div className="hero-hints" aria-hidden="true">
