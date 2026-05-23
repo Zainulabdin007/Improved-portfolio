@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import NavBar from './components/NavBar'
 import AuroraSection from './components/AuroraSection'
 import HeroAuroraContent from './components/HeroAuroraContent'
@@ -13,6 +13,15 @@ import './App.css'
 
 export default function App() {
   const [booting, setBooting] = useState(true)
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('is-booting', booting)
+    document.body.style.overflow = booting ? 'hidden' : ''
+    return () => {
+      document.documentElement.classList.remove('is-booting')
+      document.body.style.overflow = ''
+    }
+  }, [booting])
 
   return (
     <>

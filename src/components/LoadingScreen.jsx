@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { runBootPreload } from '../utils/bootPreload'
+import { waitForBootGates } from '../utils/bootReadiness'
 import './LoadingScreen.css'
 
 const BOOT_LINES = [
@@ -137,25 +139,21 @@ function MobileDeclinedPanel({ onContinueAnyway }) {
   )
 }
 
-/** Boot-style loading overlay shown until fonts + window assets are ready. */
+const BOOT_GATES = [
+  'aurora',
+  'heroGltf',
+  'hflowComputer',
+  'hflowDino',
+  'scrollLayout',
+]
+
+/** Boot overlay — waits for real assets, WebGL, GLTF, and scroll layout before unlock. */
 export default function LoadingScreen({ onDone }) {
   const [done, setDone] = useState(false)
   /* boot → prompt (mobile only) → declined | exiting */
   const [phase, setPhase] = useState('boot')
 
   useEffect(() => {
-    const fonts =
-      typeof document !== 'undefined' && document.fonts
-        ? document.fonts.ready
-        : Promise.resolve()
-
-    const winLoad =
-      document.readyState === 'complete'
-        ? Promise.resolve()
-        : new Promise((resolve) =>
-            window.addEventListener('load', resolve, { once: true }),
-          )
-
     const minTime = new Promise((resolve) => setTimeout(resolve, MIN_VISIBLE_MS))
 
     let cancelled = false
@@ -170,7 +168,13 @@ export default function LoadingScreen({ onDone }) {
       }, FADE_MS)
     }
 
-    Promise.all([fonts, winLoad, minTime]).then(() => {
+    const bootReady = Promise.all([
+      runBootPreload(),
+      waitForBootGates(BOOT_GATES),
+      minTime,
+    ])
+
+    bootReady.then(() => {
       if (cancelled) return
       if (isMobileExperience()) {
         setPhase('prompt')
@@ -179,12 +183,9 @@ export default function LoadingScreen({ onDone }) {
       }
     })
 
-    document.body.style.overflow = 'hidden'
-
     return () => {
       cancelled = true
       if (exitTimer) window.clearTimeout(exitTimer)
-      document.body.style.overflow = ''
     }
   }, [onDone])
 

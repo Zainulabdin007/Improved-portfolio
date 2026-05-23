@@ -36,6 +36,7 @@ import { TbCursorText } from 'react-icons/tb'
 import HeroWaveDivider from './HeroWaveDivider'
 import Waves from './Waves'
 import TopoPattern from './TopoPattern'
+import { markBootGate, signalScrollSetup } from '../utils/bootReadiness'
 import { SCROLL_SCRUB_HFLOW } from '../utils/scrollConfig'
 import './PageHorizontalFlow.css'
 
@@ -83,6 +84,10 @@ function ComputerModel({ rotationRef }) {
   const { scene } = useGLTF(COMPUTER_URL)
   const groupRef = useRef()
 
+  useEffect(() => {
+    if (scene) markBootGate('hflowComputer')
+  }, [scene])
+
   useFrame(() => {
     if (groupRef.current) {
       groupRef.current.rotation.y = rotationRef.current
@@ -108,6 +113,10 @@ function DinoModel({ positionRef, scrollActiveRef }) {
   const actionRef = useRef(null)
   const { scene, animations } = useGLTF(DINO_URL)
   const { actions, names } = useAnimations(animations, groupRef)
+
+  useEffect(() => {
+    if (scene) markBootGate('hflowDino')
+  }, [scene])
 
   useEffect(() => {
     if (names.length === 0) return
@@ -165,8 +174,8 @@ function DinoModel({ positionRef, scrollActiveRef }) {
 /** Wider window = slower horizontal pan between about and computer panels. */
 const PAN1_END = 0.24
 const SPIN_END = 0.55
-/** Pan computer → experience (gap vs spin end reduced ~60%). */
-const PAN2_END = 0.564
+/** Pan computer → experience — wide window so the transition is slow and deliberate. */
+const PAN2_END = 0.72
 /** Strip enter offset — 40% of prior 0.5 so the header appears sooner. */
 const EXP_ENTER_OFFSET = 0.2
 /** Last card center at this viewport fraction before the tail scroll. */
@@ -325,6 +334,8 @@ export default function PageHorizontalFlow() {
         }
       },
     })
+
+    signalScrollSetup('page-horizontal-flow')
 
     return () => trigger.kill()
   }, [])

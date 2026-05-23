@@ -28,6 +28,12 @@ body,
   min-height: 100%;
 }
 
+html.is-booting,
+html.is-booting body {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
 body {
   overflow-x: hidden;
   overflow-y: auto;

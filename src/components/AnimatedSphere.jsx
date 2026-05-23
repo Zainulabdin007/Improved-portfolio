@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Center, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { GLB_URL } from '../constants'
+import { markBootGate } from '../utils/bootReadiness'
 import { onViewportScaleChange, readUiScale } from '../utils/viewportVars'
 
 useGLTF.preload(GLB_URL)
@@ -32,6 +33,10 @@ export default function AnimatedSphere() {
   const mixerRef = useRef(null)
   const [uiScale, setUiScale] = useState(1)
   const { scene, animations } = useGLTF(GLB_URL)
+
+  useEffect(() => {
+    if (scene) markBootGate('heroGltf')
+  }, [scene])
 
   const model = useMemo(() => scene.clone(true), [scene])
   const morphClip = useMemo(() => buildMorphClip(animations), [animations])

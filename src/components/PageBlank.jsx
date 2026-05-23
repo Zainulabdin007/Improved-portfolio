@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import HeroWaveDivider from './HeroWaveDivider'
 import GradientBlinds from './GradientBlinds'
 import BorderGlow from './BorderGlow'
+import { signalScrollSetup } from '../utils/bootReadiness'
 import { SCROLL_SCRUB_HFLOW } from '../utils/scrollConfig'
 import './PageBlank.css'
 
@@ -113,10 +114,10 @@ const PROJECTS = [
   },
 ]
 
-/* After ~72% of section scroll (projects content), pan left to contact */
-const PAN_START = 0.72
-/* Extra scroll runway for the projects → contact transition */
-const PAN_HEIGHT_PX = 1200
+/* After this progress, projects shell is fully scrolled — pan to contact begins */
+const PAN_START = 0.62
+/* Extra scroll runway for the projects → contact transition (wide = slow pan) */
+const PAN_HEIGHT_PX = 3600
 
 const easeInOut = (t) =>
   t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
@@ -284,6 +285,8 @@ export default function PageBlank() {
       img.addEventListener('load', onResize, { once: true })
       img.addEventListener('error', onResize, { once: true })
     })
+
+    signalScrollSetup('page-blank')
 
     return () => {
       window.removeEventListener('resize', onResize)

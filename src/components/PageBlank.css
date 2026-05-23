@@ -11,8 +11,8 @@
   /* Base/fallback only — actual height is computed by JS (PageBlank.jsx)
    * so the projects shell always gets enough scroll runway to translate
    * through its full content regardless of viewport / stacking. */
-  height: 460vh;
-  height: 460svh;
+  height: 520vh;
+  height: 520svh;
   background: #5227ff;
   overflow: visible;
   isolation: isolate;

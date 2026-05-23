@@ -1,5 +1,6 @@
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl'
 import { useEffect, useRef } from 'react'
+import { markBootGate } from '../utils/bootReadiness'
 import './Aurora.css'
 
 const VERT = `#version 300 es
@@ -169,8 +170,13 @@ export default function Aurora(props) {
     ctn.appendChild(gl.canvas)
 
     let animateId = 0
+    let auroraReady = false
     const update = (t) => {
       animateId = requestAnimationFrame(update)
+      if (!auroraReady) {
+        auroraReady = true
+        markBootGate('aurora')
+      }
       const { time = t * 0.01, speed = 1.0 } = propsRef.current
       program.uniforms.uTime.value = time * speed * 0.1
       program.uniforms.uAmplitude.value = propsRef.current.amplitude ?? 1.0

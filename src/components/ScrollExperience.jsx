@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { signalScrollSetup } from '../utils/bootReadiness'
 import { SCROLL_SCRUB } from '../utils/scrollConfig'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -51,6 +52,8 @@ export default function ScrollExperience({ children }) {
         )
       }
     })
+
+    signalScrollSetup('scroll-experience')
 
     const onRefresh = () => ScrollTrigger.refresh()
     window.addEventListener('resize', onRefresh)
