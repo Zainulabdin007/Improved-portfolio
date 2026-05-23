@@ -68,21 +68,21 @@
   fill: #050505;
 }
 
-/* Horizontal track — 200vw, two panels side by side */
+/* Horizontal track — 200% of pin width, two equal panels */
 .projects-track {
   position: relative;
   z-index: 2;
   display: flex;
-  width: 200vw;
+  width: 200%;
   height: 100%;
   /* Start on the projects panel (second panel in the track) */
-  transform: translate3d(-100vw, 0, 0);
+  transform: translate3d(-50%, 0, 0);
   will-change: transform;
 }
 
 .projects-panel {
-  flex: 0 0 100vw;
-  width: 100vw;
+  flex: 0 0 50%;
+  width: 50%;
   height: 100%;
   position: relative;
   overflow: hidden;

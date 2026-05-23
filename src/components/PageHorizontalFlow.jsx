@@ -220,22 +220,22 @@ const EXPERIENCES = [
 // Quadratic ease-out — fast lift, soft settle
 const easeOut = (t) => 1 - Math.pow(1 - t, 2)
 
-// Slides travel horizontally: enter from the right (+80vw), dwell at 0,
-// exit to the left (-80vw). The last slide has null exit windows and
-// stays parked at x=0 / opacity=1.
+// Slides travel horizontally: enter from the right (+100%), dwell at 0,
+// exit to the left (-100%). Percentages are relative to the slide stack
+// width so motion stays proportional on every viewport.
 function computeSlideState(p, slide) {
   const { enterStart, enterEnd, exitStart, exitEnd } = slide
-  if (p < enterStart) return { x: 80, opacity: 0 }
+  if (p < enterStart) return { x: 100, opacity: 0 }
   if (p < enterEnd) {
     const t = easeOut((p - enterStart) / (enterEnd - enterStart))
-    return { x: (1 - t) * 80, opacity: t }
+    return { x: (1 - t) * 100, opacity: t }
   }
   if (exitStart === null || p < exitStart) return { x: 0, opacity: 1 }
   if (p < exitEnd) {
     const t = (p - exitStart) / (exitEnd - exitStart)
-    return { x: -t * 80, opacity: 1 - t }
+    return { x: -t * 100, opacity: 1 - t }
   }
-  return { x: -80, opacity: 0 }
+  return { x: -100, opacity: 0 }
 }
 
 export default function PageHorizontalFlow() {
@@ -277,25 +277,26 @@ export default function PageHorizontalFlow() {
           card.style.setProperty('--rise', '0vh')
           card.style.setProperty('--rise-opacity', '1')
           const panProgress = (p - RISE_END) / (PAN1_END - RISE_END)
-          track.style.transform = `translate3d(${-panProgress * 100}vw, 0, 0)`
+          track.style.transform = `translate3d(${-panProgress * (100 / 3)}%, 0, 0)`
           rotationRef.current = 0
           stage.style.setProperty('--progress', '0')
         } else if (p < SPIN_END) {
           // Phase 2 — computer spin + logo reveal
-          track.style.transform = 'translate3d(-100vw, 0, 0)'
+          track.style.transform = 'translate3d(-33.333%, 0, 0)'
           const spinProgress = (p - PAN1_END) / (SPIN_END - PAN1_END)
           rotationRef.current = spinProgress * Math.PI * 4
           stage.style.setProperty('--progress', String(spinProgress))
         } else if (p < PAN2_END) {
           // Phase 3 — pan to experience
           track.style.transform = `translate3d(${
-            -100 - ((p - SPIN_END) / (PAN2_END - SPIN_END)) * 100
-          }vw, 0, 0)`
+            -(100 / 3) -
+            ((p - SPIN_END) / (PAN2_END - SPIN_END)) * (100 / 3)
+          }%, 0, 0)`
           rotationRef.current = Math.PI * 4
           stage.style.setProperty('--progress', '1')
         } else {
           // Phase 4 — experience panel pinned in view
-          track.style.transform = 'translate3d(-200vw, 0, 0)'
+          track.style.transform = 'translate3d(-66.666%, 0, 0)'
           rotationRef.current = Math.PI * 4
           stage.style.setProperty('--progress', '1')
         }
@@ -306,7 +307,7 @@ export default function PageHorizontalFlow() {
           const el = slidesRef.current[i]
           if (!el) return
           const { x, opacity } = computeSlideState(p, slide)
-          el.style.transform = `translate3d(${x}vw, 0, 0)`
+          el.style.transform = `translate3d(${x}%, 0, 0)`
           el.style.opacity = String(opacity)
         })
 

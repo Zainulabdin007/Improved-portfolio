@@ -1,5 +1,5 @@
-import { Suspense } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Suspense, useLayoutEffect, useRef } from 'react'
+import { Canvas, useThree } from '@react-three/fiber'
 import AnimatedSphere from './AnimatedSphere'
 import HeroHands from './HeroHands'
 import './HeroScene.css'
@@ -15,7 +15,32 @@ function SceneLights() {
   )
 }
 
-function HeroCanvas() {
+/** Keep aspect ratio correct on resize — camera distance/FOV stay fixed. */
+function AspectCamera({ stageRef }) {
+  const { camera } = useThree()
+
+  useLayoutEffect(() => {
+    const stage = stageRef.current
+    if (!stage) return
+
+    const update = () => {
+      const w = stage.clientWidth
+      const h = stage.clientHeight
+      if (w <= 0 || h <= 0) return
+      camera.aspect = w / h
+      camera.updateProjectionMatrix()
+    }
+
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(stage)
+    return () => ro.disconnect()
+  }, [camera, stageRef])
+
+  return null
+}
+
+function HeroCanvas({ stageRef }) {
   return (
     <Canvas
       className="hero__canvas"
@@ -36,6 +61,7 @@ function HeroCanvas() {
         camera.updateProjectionMatrix()
       }}
     >
+      <AspectCamera stageRef={stageRef} />
       <Suspense fallback={null}>
         <SceneLights />
         <AnimatedSphere />
@@ -45,9 +71,11 @@ function HeroCanvas() {
 }
 
 export default function HeroScene() {
+  const stageRef = useRef(null)
+
   return (
-    <div className="hero__stage">
-      <HeroCanvas />
+    <div ref={stageRef} className="hero__stage">
+      <HeroCanvas stageRef={stageRef} />
       <HeroHands />
     </div>
   )

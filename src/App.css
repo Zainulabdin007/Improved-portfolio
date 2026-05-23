@@ -1,5 +1,7 @@
 .site-main {
   width: 100%;
+  /* Desktop/laptop layout — not reflowed for phone widths */
+  min-width: 1024px;
 }
 
 .hero-viewport {

@@ -247,13 +247,13 @@ export default function PageBlank() {
         if (p < PAN_START) {
           const scrollProgress = p / PAN_START
           /* Projects panel is second in the track — hold at -100vw */
-          track.style.transform = 'translate3d(-100vw, 0, 0)'
+          track.style.transform = 'translate3d(-50%, 0, 0)'
           shell.style.transform = `translate3d(0, ${-scrollProgress * maxScroll}px, 0)`
         } else {
           const panProgress = (p - PAN_START) / (1 - PAN_START)
           shell.style.transform = `translate3d(0, ${-maxScroll}px, 0)`
           /* Pan left: track moves from -100vw → 0, contact panel enters from the left */
-          track.style.transform = `translate3d(${-100 + panProgress * 100}vw, 0, 0)`
+          track.style.transform = `translate3d(${-50 + panProgress * 50}%, 0, 0)`
         }
       },
     })

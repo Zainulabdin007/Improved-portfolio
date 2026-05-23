@@ -1,15 +1,34 @@
 /*
- * --hand-progress: 0  → hand is fully off-screen
- * --hand-progress: 1  → hand at its final on-screen position
- * GSAP scrubs this value as the user scrolls through page 2.
+ * Hand layout vars (--hand-width, --hand-scale, --hand-travel, etc.) are
+ * computed in HeroHands.jsx from the actual .hero__stage size.
+ * Targets laptop/desktop — same footprint across screen sizes.
+ *
+ * --hand-progress: 0 → off-screen | 1 → resting beside the sphere
  */
+
+.hero__hands {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
 .hero__hand {
   --hand-progress: 0;
+  --hand-width: min(38vw, 400px);
+  --hand-height: min(75vh, 760px);
+  --hand-scale: 3;
+  --hand-travel: 120vw;
+  --hand-y-left: -46%;
+  --hand-y-right: -44%;
+  --hand-edge-left: -4vw;
+  --hand-edge-right: -1vw;
+
   position: absolute;
-  top: 52%;
+  top: 46%;
   z-index: 3;
-  width: min(38vw, 400px);
-  height: min(75vh, 760px);
+  width: var(--hand-width);
+  height: var(--hand-height);
   pointer-events: none;
   opacity: 1;
   line-height: 0;
@@ -17,17 +36,23 @@
 }
 
 .hero__hand--left {
-  left: -4vw;
-  top: 46%;
-  transform: translate(calc((1 - var(--hand-progress)) * -120vw), -46%) scale(3);
+  left: var(--hand-edge-left);
+  transform: translate(
+      calc((1 - var(--hand-progress)) * var(--hand-travel) * -1),
+      var(--hand-y-left)
+    )
+    scale(var(--hand-scale));
   transform-origin: left center;
 }
 
 .hero__hand--right {
-  right: -1vw;
+  right: var(--hand-edge-right);
   left: auto;
-  top: 46%;
-  transform: translate(calc((1 - var(--hand-progress)) * 120vw), -44%) scale(3);
+  transform: translate(
+      calc((1 - var(--hand-progress)) * var(--hand-travel)),
+      var(--hand-y-right)
+    )
+    scale(var(--hand-scale));
   transform-origin: right center;
 }
 
@@ -38,7 +63,6 @@
   object-fit: contain;
   object-position: left 55% center;
   opacity: 1;
-  /* Black in the PNG drops out; white lines stay solid white */
   mix-blend-mode: screen;
   -webkit-mix-blend-mode: screen;
   user-select: none;
@@ -48,64 +72,6 @@
 .hero__hand--right .hero__hand__img {
   object-position: right 55% center;
   transform: rotate(180deg);
-}
-
-@media (max-width: 900px) {
-  .hero__hand {
-    width: min(42vw, 320px);
-    height: min(68vh, 580px);
-  }
-
-  .hero__hand--left {
-    left: -7vw;
-    top: 44%;
-    transform: translate(calc((1 - var(--hand-progress)) * -120vw), -46%) scale(3);
-  }
-
-  .hero__hand--right {
-    right: -2vw;
-    top: 43%;
-    transform: translate(calc((1 - var(--hand-progress)) * 120vw), -44%) scale(3);
-  }
-}
-
-@media (max-width: 640px) {
-  .hero__hand {
-    top: 54%;
-    width: min(48vw, 240px);
-    height: min(58vh, 420px);
-  }
-
-  .hero__hand--left {
-    left: -9vw;
-    top: 50%;
-    transform: translate(calc((1 - var(--hand-progress)) * -120vw), -44%) scale(2);
-  }
-
-  .hero__hand--right {
-    right: -3vw;
-    top: 50%;
-    transform: translate(calc((1 - var(--hand-progress)) * 120vw), -42%) scale(2);
-  }
-}
-
-@media (max-width: 380px) {
-  /* Pull the hands tighter on tiny phones so they cradle the smaller
-   * sphere rather than swallowing it. */
-  .hero__hand {
-    width: min(54vw, 210px);
-    height: min(54vh, 360px);
-  }
-
-  .hero__hand--left {
-    left: -10vw;
-    transform: translate(calc((1 - var(--hand-progress)) * -120vw), -44%) scale(1.7);
-  }
-
-  .hero__hand--right {
-    right: -4vw;
-    transform: translate(calc((1 - var(--hand-progress)) * 120vw), -42%) scale(1.7);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

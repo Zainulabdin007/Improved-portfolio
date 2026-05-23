@@ -20,12 +20,3 @@
   isolation: isolate;
   z-index: 0;
 }
-
-@media (max-width: 640px) {
-  .page-section--sphere {
-    /* Shorter on mobile so the user isn't trapped scrolling forever on
-       a section with a smaller animation payload. */
-    height: 240vh;
-    height: 240svh;
-  }
-}
