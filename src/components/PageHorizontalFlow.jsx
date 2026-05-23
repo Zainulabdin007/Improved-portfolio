@@ -36,6 +36,7 @@ import { TbCursorText } from 'react-icons/tb'
 import HeroWaveDivider from './HeroWaveDivider'
 import Waves from './Waves'
 import TopoPattern from './TopoPattern'
+import { SCROLL_SCRUB_HFLOW } from '../utils/scrollConfig'
 import './PageHorizontalFlow.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -161,16 +162,29 @@ function DinoModel({ positionRef, scrollActiveRef }) {
  *   Phase 2 (SPIN   → PAN2_END)   pan: computer → experience (-200vw)
  *   Phase 3 (PAN2   → 1)          header + cards strip scrolls horizontally
  */
-const PAN1_END = 0.2
+/** Wider window = slower horizontal pan between about and computer panels. */
+const PAN1_END = 0.24
 const SPIN_END = 0.55
-/** Pan computer → experience (halved again from 0.6 → 0.575). */
-const PAN2_END = 0.575
-/** Strip starts this far off-screen right (0.5 = half the former enter distance). */
-const EXP_ENTER_OFFSET = 0.5
+/** Pan computer → experience (gap vs spin end reduced ~60%). */
+const PAN2_END = 0.564
+/** Strip enter offset — 40% of prior 0.5 so the header appears sooner. */
+const EXP_ENTER_OFFSET = 0.2
 /** Last card center at this viewport fraction before the tail scroll. */
 const LAST_CARD_VIEWPORT_X = 0.55
 /** Extra scroll past the last-card stop, as a fraction of that leg's travel. */
 const TAIL_AFTER_LAST_CARD = 0.25
+/** Ease the first portion of experience scroll so the header glides in slowly. */
+const EXP_ENTER_EASE_FRAC = 0.4
+
+const easeInOut = (t) =>
+  t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+
+function experienceExpProgress(p) {
+  if (p < PAN2_END) return 0
+  const linear = (p - PAN2_END) / (1 - PAN2_END)
+  if (linear >= EXP_ENTER_EASE_FRAC) return linear
+  return easeInOut(linear / EXP_ENTER_EASE_FRAC) * EXP_ENTER_EASE_FRAC
+}
 
 const EXPERIENCES = [
   {
@@ -244,14 +258,14 @@ export default function PageHorizontalFlow() {
       trigger: section,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1.1,
+      scrub: SCROLL_SCRUB_HFLOW,
       onUpdate: (self) => {
         const p = self.progress
         scrollActiveRef.current = performance.now()
 
         if (p < PAN1_END) {
           // Phase 0 — pan to computer (about card stays fixed)
-          const panProgress = p / PAN1_END
+          const panProgress = easeInOut(p / PAN1_END)
           track.style.transform = `translate3d(${-panProgress * (100 / 3)}%, 0, 0)`
           rotationRef.current = 0
           stage.style.setProperty('--progress', '0')
@@ -262,10 +276,12 @@ export default function PageHorizontalFlow() {
           rotationRef.current = spinProgress * Math.PI * 4
           stage.style.setProperty('--progress', String(spinProgress))
         } else if (p < PAN2_END) {
-          // Phase 2 — pan to experience
+          // Phase 2 — pan to experience (eased; short gap kept at 60% reduction)
+          const panProgress = easeInOut(
+            (p - SPIN_END) / (PAN2_END - SPIN_END),
+          )
           track.style.transform = `translate3d(${
-            -(100 / 3) -
-            ((p - SPIN_END) / (PAN2_END - SPIN_END)) * (100 / 3)
+            -(100 / 3) - panProgress * (100 / 3)
           }%, 0, 0)`
           rotationRef.current = Math.PI * 4
           stage.style.setProperty('--progress', '1')
@@ -280,12 +296,8 @@ export default function PageHorizontalFlow() {
         const expViewport = experienceViewportRef.current
         const expStrip = experienceStripRef.current
         if (expStrip && expViewport) {
-          const expP =
-            p >= PAN2_END ? (p - PAN2_END) / (1 - PAN2_END) : 0
-          const x =
-            p >= PAN2_END
-              ? experienceStripX(expViewport, expStrip, expP)
-              : experienceStripX(expViewport, expStrip, 0)
+          const expP = experienceExpProgress(p)
+          const x = experienceStripX(expViewport, expStrip, expP)
           expStrip.style.transform = `translate3d(${x}px, 0, 0)`
         }
 

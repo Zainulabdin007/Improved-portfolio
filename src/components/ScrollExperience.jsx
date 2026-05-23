@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { SCROLL_SCRUB } from '../utils/scrollConfig'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -11,9 +12,6 @@ gsap.registerPlugin(ScrollTrigger)
  * URL bar, which used to cause stutters near section boundaries.
  */
 ScrollTrigger.config({ ignoreMobileResize: true })
-
-/* Smoothed scrub feel — higher values = more lerp delay = silkier */
-const SMOOTH_SCRUB = 1.1
 
 export default function ScrollExperience({ children }) {
   useLayoutEffect(() => {
@@ -27,14 +25,13 @@ export default function ScrollExperience({ children }) {
             trigger: hero,
             start: 'top top',
             end: 'bottom top',
-            scrub: SMOOTH_SCRUB,
+            scrub: SCROLL_SCRUB,
           },
         })
       }
 
       // Page 2: scrub hands in from off-screen as the sphere is pinned.
-      // End extended to 130% so the hands take longer to glide in, which
-      // dramatically smooths the motion under the new heavier scrub.
+      // Extended runway so hands glide in slowly across the page-2 transition.
       const sphereSection = document.querySelector('#page-2')
       const hands = document.querySelectorAll('#page-2 .hero__hand')
       if (sphereSection && hands.length) {
@@ -47,8 +44,8 @@ export default function ScrollExperience({ children }) {
             scrollTrigger: {
               trigger: sphereSection,
               start: 'top top',
-              end: '+=130%',
-              scrub: SMOOTH_SCRUB,
+              end: '+=165%',
+              scrub: SCROLL_SCRUB,
             },
           },
         )

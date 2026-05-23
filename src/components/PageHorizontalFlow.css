@@ -12,9 +12,9 @@
 .page-section--hflow {
   position: relative;
   width: 100%;
-  /* pan1 + spin + pan2 + experience strip (~10 vp of scroll). */
-  height: 1100vh;
-  height: 1100svh;
+  /* Extra runway so panel transitions are not rushed. */
+  height: 1150vh;
+  height: 1150svh;
   background: #050505;
   overflow: visible;
   isolation: isolate;

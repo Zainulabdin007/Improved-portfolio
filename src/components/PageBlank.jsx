@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import HeroWaveDivider from './HeroWaveDivider'
 import GradientBlinds from './GradientBlinds'
 import BorderGlow from './BorderGlow'
+import { SCROLL_SCRUB_HFLOW } from '../utils/scrollConfig'
 import './PageBlank.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -112,11 +113,13 @@ const PROJECTS = [
   },
 ]
 
-/* After ~78% of section scroll (projects content), pan left to contact */
-const PAN_START = 0.78
-/* Extra px reserved above the pan window so the slide-in feels deliberate
- * under the heavier scrub. */
-const PAN_HEIGHT_PX = 900
+/* After ~72% of section scroll (projects content), pan left to contact */
+const PAN_START = 0.72
+/* Extra scroll runway for the projects → contact transition */
+const PAN_HEIGHT_PX = 1200
+
+const easeInOut = (t) =>
+  t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
 
 function useReveal() {
   const ref = useRef(null)
@@ -240,7 +243,7 @@ export default function PageBlank() {
       trigger: section,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1.1,
+      scrub: SCROLL_SCRUB_HFLOW,
       onUpdate: (self) => {
         const p = self.progress
 
@@ -250,7 +253,7 @@ export default function PageBlank() {
           track.style.transform = 'translate3d(-50%, 0, 0)'
           shell.style.transform = `translate3d(0, ${-scrollProgress * maxScroll}px, 0)`
         } else {
-          const panProgress = (p - PAN_START) / (1 - PAN_START)
+          const panProgress = easeInOut((p - PAN_START) / (1 - PAN_START))
           shell.style.transform = `translate3d(0, ${-maxScroll}px, 0)`
           /* Pan left: track moves from -100vw → 0, contact panel enters from the left */
           track.style.transform = `translate3d(${-50 + panProgress * 50}%, 0, 0)`

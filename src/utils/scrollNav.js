@@ -2,8 +2,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 /** Start of #about — card is fixed in place (no rise animation). */
 const ABOUT_PROGRESS = 0
-/** Past PAN2_END (0.575) once the experience strip has scrolled into view. */
-const EXPERIENCE_PROGRESS = 0.62
+/** Past PAN2_END (0.564) once the experience strip has scrolled into view. */
+const EXPERIENCE_PROGRESS = 0.6
 /** End of #projects + small overscroll so smooth scroll finishes the contact pan. */
 const CONTACT_PROGRESS = 1
 const CONTACT_EXTRA_PX = 120
