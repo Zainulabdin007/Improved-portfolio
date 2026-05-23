@@ -138,10 +138,40 @@
 .loading-screen__line {
   flex-shrink: 0;
   opacity: 0;
-  transform: translateY(6px);
-  animation-name: terminal-print;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  animation-fill-mode: forwards;
+  transform: translateY(4px);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.loading-screen__line.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.loading-screen__line.is-loading .loading-screen__label {
+  color: #f5f5f7;
+}
+
+.loading-screen__dots-anim {
+  display: inline-block;
+  margin-left: 0.12em;
+  vertical-align: baseline;
+  color: rgba(232, 255, 54, 0.92);
+  letter-spacing: 0.08em;
+}
+
+.loading-screen__dots-anim span {
+  display: inline-block;
+  animation: loading-dot 0.95s ease-in-out infinite;
+}
+
+.loading-screen__dots-anim span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.loading-screen__dots-anim span:nth-child(3) {
+  animation-delay: 0.32s;
 }
 
 .loading-screen__prompt {
@@ -158,9 +188,6 @@
 
 .loading-screen__status {
   opacity: 0;
-  animation-name: terminal-status-in;
-  animation-timing-function: ease;
-  animation-fill-mode: forwards;
   color: #66ff9c;
   font-weight: 500;
   text-shadow: 0 0 8px rgba(102, 255, 156, 0.35);
@@ -175,6 +202,10 @@
   color: rgba(245, 245, 247, 0.45);
   text-shadow: none;
   font-weight: 400;
+}
+
+.loading-screen__status.is-visible {
+  animation: terminal-status-in 0.22s ease forwards;
 }
 
 .loading-screen__line.is-subheader {
@@ -255,10 +286,17 @@
   animation: terminal-blink 1s steps(1) infinite;
 }
 
-@keyframes terminal-print {
-  to {
-    opacity: 1;
+@keyframes loading-dot {
+  0%,
+  70%,
+  100% {
+    opacity: 0.25;
     transform: translateY(0);
+  }
+
+  35% {
+    opacity: 1;
+    transform: translateY(-2px);
   }
 }
 
@@ -526,12 +564,18 @@
   }
 
   .loading-screen__line {
-    animation: none;
+    transition: none;
     opacity: 1;
     transform: none;
   }
 
-  .loading-screen__status {
+  .loading-screen__dots-anim span {
+    animation: none;
+    opacity: 1;
+  }
+
+  .loading-screen__status,
+  .loading-screen__status.is-visible {
     animation: none;
     opacity: 1;
     transform: none;

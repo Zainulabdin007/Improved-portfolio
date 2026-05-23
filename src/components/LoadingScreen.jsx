@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { finalizeSiteBoot } from '../utils/bootReadiness'
 import './LoadingScreen.css'
 
 /**
- * Terminal boot sequence — variable pacing so heavy steps feel slower.
- * @type {Array<{ id: string, kind: string, label: string, dots?: string, status?: string, statusTone?: string, waitMs?: number, animMs?: number, statusDelayMs?: number }>}
+ * Terminal boot sequence — variable pacing per line (see useBootTerminal).
+ * @type {Array<{ id: string, kind: string, label: string, dots?: string, status?: string, statusTone?: string, waitMs?: number, loadMs?: number }>}
  */
 const BOOT_LINES = [
   { id: 'sub2', kind: 'subheader', label: '// 3D ASSET PIPELINE' },
@@ -13,7 +13,7 @@ const BOOT_LINES = [
     kind: 'pending',
     label: 'Streaming Draco-compressed meshes ...',
     waitMs: 520,
-    animMs: 560,
+    loadMs: 560,
   },
   {
     id: 't3',
@@ -23,7 +23,7 @@ const BOOT_LINES = [
     status: 'OK',
     statusTone: 'ok',
     waitMs: 380,
-    statusDelayMs: 920,
+    loadMs: 920,
   },
   {
     id: 't4',
@@ -33,8 +33,7 @@ const BOOT_LINES = [
     status: 'OK',
     statusTone: 'ok',
     waitMs: 320,
-    animMs: 480,
-    statusDelayMs: 1280,
+    loadMs: 1280,
   },
   {
     id: 't5',
@@ -44,7 +43,7 @@ const BOOT_LINES = [
     status: 'LOCK',
     statusTone: 'cyan',
     waitMs: 280,
-    statusDelayMs: 1040,
+    loadMs: 1040,
   },
   {
     id: 't6',
@@ -54,7 +53,7 @@ const BOOT_LINES = [
     status: '1.2 GB',
     statusTone: 'muted',
     waitMs: 240,
-    statusDelayMs: 680,
+    loadMs: 680,
   },
   { id: 'sub3', kind: 'subheader', label: '// SCROLL CHOREOGRAPHY', waitMs: 480 },
   {
@@ -62,7 +61,7 @@ const BOOT_LINES = [
     kind: 'pending',
     label: 'Measuring pin zones & scrub curves ...',
     waitMs: 540,
-    animMs: 520,
+    loadMs: 520,
   },
   {
     id: 't7',
@@ -72,7 +71,7 @@ const BOOT_LINES = [
     status: 'SYNC',
     statusTone: 'cyan',
     waitMs: 360,
-    statusDelayMs: 860,
+    loadMs: 860,
   },
   {
     id: 't8',
@@ -82,7 +81,7 @@ const BOOT_LINES = [
     status: 'OK',
     statusTone: 'ok',
     waitMs: 300,
-    statusDelayMs: 620,
+    loadMs: 620,
   },
   {
     id: 't9',
@@ -92,7 +91,7 @@ const BOOT_LINES = [
     status: '0,0',
     statusTone: 'muted',
     waitMs: 260,
-    statusDelayMs: 540,
+    loadMs: 540,
   },
   {
     id: 't10',
@@ -102,7 +101,7 @@ const BOOT_LINES = [
     status: 'DONE',
     statusTone: 'ok',
     waitMs: 280,
-    statusDelayMs: 780,
+    loadMs: 780,
   },
   { id: 'sub4', kind: 'subheader', label: '// MEDIA & TYPE', waitMs: 460 },
   {
@@ -110,7 +109,7 @@ const BOOT_LINES = [
     kind: 'pending',
     label: 'Prefetching textures & project stills ...',
     waitMs: 580,
-    animMs: 540,
+    loadMs: 540,
   },
   {
     id: 't11',
@@ -120,7 +119,7 @@ const BOOT_LINES = [
     status: 'OK',
     statusTone: 'ok',
     waitMs: 300,
-    statusDelayMs: 640,
+    loadMs: 640,
   },
   {
     id: 't12',
@@ -130,7 +129,7 @@ const BOOT_LINES = [
     status: 'OK',
     statusTone: 'ok',
     waitMs: 320,
-    statusDelayMs: 880,
+    loadMs: 880,
   },
   {
     id: 't13',
@@ -140,7 +139,7 @@ const BOOT_LINES = [
     status: 'OK',
     statusTone: 'ok',
     waitMs: 260,
-    statusDelayMs: 560,
+    loadMs: 560,
   },
   { id: 'sub5', kind: 'subheader', label: '// FINAL CHECKS', waitMs: 500 },
   {
@@ -148,7 +147,7 @@ const BOOT_LINES = [
     kind: 'pending',
     label: 'Awaiting first hero frame composite ...',
     waitMs: 620,
-    animMs: 580,
+    loadMs: 580,
   },
   {
     id: 't14',
@@ -158,7 +157,7 @@ const BOOT_LINES = [
     status: '7/7',
     statusTone: 'cyan',
     waitMs: 340,
-    statusDelayMs: 1120,
+    loadMs: 1120,
   },
   {
     id: 't15',
@@ -168,14 +167,14 @@ const BOOT_LINES = [
     status: '100%',
     statusTone: 'ok',
     waitMs: 300,
-    statusDelayMs: 720,
+    loadMs: 720,
   },
   {
     id: 'fin',
     kind: 'final',
     label: 'All systems online — entering experience.',
     waitMs: 720,
-    animMs: 620,
+    loadMs: 620,
   },
 ]
 
@@ -212,59 +211,127 @@ function defaultWaitMs(line) {
 }
 
 /** @param {typeof BOOT_LINES[number]} line */
-function defaultAnimMs(line) {
-  switch (line.kind) {
-    case 'subheader':
-      return 380
-    case 'pending':
-      return 500
-    case 'task':
-      return 440
-    case 'metric':
-      return 400
-    case 'final':
-      return 560
-    default:
-      return 420
-  }
-}
-
-/** @param {typeof BOOT_LINES[number]} line */
-function defaultStatusDelayMs(line) {
-  if (!line.status) return 0
+function defaultLoadMs(line) {
   const heavy =
     /GLB|meshes|composite|gates|sprites|morph|dino|ScrollTrigger/i.test(
       line.label,
     )
-  if (line.kind === 'metric') return 520
-  return heavy ? 720 : 480
-}
-
-function buildBootSchedule(lines) {
-  let t = bootMs(200)
-  const scheduled = lines.map((line) => {
-    const wait = bootMs(line.waitMs ?? defaultWaitMs(line))
-    const anim = bootMs(line.animMs ?? defaultAnimMs(line))
-    const appearAt = t + wait
-    const statusDelay = line.status
-      ? bootMs(line.statusDelayMs ?? defaultStatusDelayMs(line))
-      : 0
-    const statusAt = line.status ? appearAt + anim + statusDelay : null
-    t =
-      (statusAt ?? appearAt + anim) +
-      (line.status ? STATUS_ANIM_MS : 0)
-    return { ...line, appearAt, anim, statusAt }
-  })
-  const cursorAt = t + CURSOR_AFTER_MS
-  return {
-    lines: scheduled,
-    cursorAtMs: cursorAt,
-    sequenceMs: cursorAt + POST_SEQUENCE_MS,
+  switch (line.kind) {
+    case 'subheader':
+      return 320
+    case 'pending':
+      return 520
+    case 'task':
+      return heavy ? 880 : 620
+    case 'metric':
+      return 560
+    case 'final':
+      return 560
+    default:
+      return 480
   }
 }
 
-const BOOT_SCHEDULE = buildBootSchedule(BOOT_LINES)
-const MIN_VISIBLE_MS = Math.max(MIN_BOOT_MS, BOOT_SCHEDULE.sequenceMs)
+function lineLoadMs(line) {
+  return bootMs(line.loadMs ?? defaultLoadMs(line))
+}
+
+function lineWaitMs(line) {
+  return bootMs(line.waitMs ?? defaultWaitMs(line))
+}
+
+function buildBootSequenceMs(lines) {
+  let t = bootMs(200)
+  for (const line of lines) {
+    t += lineWaitMs(line) + lineLoadMs(line)
+    if (line.status) t += STATUS_ANIM_MS
+  }
+  return t + bootMs(CURSOR_AFTER_MS / BOOT_PACE) + POST_SEQUENCE_MS
+}
+
+const BOOT_SEQUENCE_MS = buildBootSequenceMs(BOOT_LINES)
+const MIN_VISIBLE_MS = Math.max(MIN_BOOT_MS, BOOT_SEQUENCE_MS)
+
+function sleep(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms))
+}
+
+/** Strip trailing ellipses from pending copy — animated dots are shown while loading. */
+function lineDisplayLabel(line) {
+  if (line.kind === 'pending') {
+    return line.label.replace(/\s*\.{2,}\s*$/, '')
+  }
+  return line.label
+}
+
+function LoadingDots() {
+  return (
+    <span className="loading-screen__dots-anim" aria-hidden="true">
+      <span>.</span>
+      <span>.</span>
+      <span>.</span>
+    </span>
+  )
+}
+
+/**
+ * Drives which boot lines are visible and which is actively loading.
+ * @returns {{ lineIndex: number, showStatus: boolean, sequenceDone: boolean }}
+ */
+function useBootTerminal(active) {
+  const [lineIndex, setLineIndex] = useState(0)
+  const [showStatus, setShowStatus] = useState(false)
+  const [sequenceDone, setSequenceDone] = useState(false)
+
+  useEffect(() => {
+    if (!active) return undefined
+
+    let cancelled = false
+
+    const run = async () => {
+      setLineIndex(-1)
+      setShowStatus(false)
+      setSequenceDone(false)
+
+      for (let i = 0; i < BOOT_LINES.length; i++) {
+        if (cancelled) return
+
+        const line = BOOT_LINES[i]
+        if (i > 0) {
+          await sleep(lineWaitMs(line))
+          if (cancelled) return
+        }
+
+        setLineIndex(i)
+        setShowStatus(false)
+
+        await sleep(lineLoadMs(line))
+        if (cancelled) return
+
+        if (line.status) {
+          setShowStatus(true)
+          await sleep(STATUS_ANIM_MS)
+          if (cancelled) return
+          setShowStatus(false)
+        }
+      }
+
+      setLineIndex(BOOT_LINES.length)
+      setShowStatus(false)
+      await sleep(bootMs(CURSOR_AFTER_MS / BOOT_PACE))
+      if (cancelled) return
+      setSequenceDone(true)
+    }
+
+    void run()
+
+    return () => {
+      cancelled = true
+    }
+  }, [active])
+
+  return { lineIndex, showStatus, sequenceDone }
+}
 
 /** Phones / small touch viewports — show opt-in before entering the site. */
 function isMobileExperience() {
@@ -387,11 +454,52 @@ function MobileDeclinedPanel({ onContinueAnyway }) {
   )
 }
 
+function BootTerminalLine({ line, index, lineIndex, showStatus }) {
+  if (index > lineIndex) return null
+  const i = index
+
+  const isLoading = i === lineIndex && !showStatus
+  const isComplete =
+    i < lineIndex || (i === lineIndex && showStatus && Boolean(line.status))
+
+  return (
+    <div
+      className={`loading-screen__line is-${line.kind} is-visible${
+        isLoading ? ' is-loading' : ''
+      }${isComplete ? ' is-complete' : ''}`}
+    >
+      <span className="loading-screen__prompt">{'>'}</span>{' '}
+      <span className="loading-screen__label">{lineDisplayLabel(line)}</span>
+      {isLoading && (
+        <>
+          {' '}
+          <LoadingDots />
+        </>
+      )}
+      {isComplete && line.dots && (
+        <span className="loading-screen__dots"> {line.dots} </span>
+      )}
+      {isComplete && line.status && (
+        <span
+          className={`loading-screen__status${
+            line.statusTone ? ` is-${line.statusTone}` : ''
+          } is-visible`}
+        >
+          {line.status}
+        </span>
+      )}
+    </div>
+  )
+}
+
 function BootPanel({
   showBoot,
   showPrompt,
   showDeclined,
   bootProgress,
+  lineIndex,
+  showStatus,
+  showCursor,
   onContinue,
   onDecline,
   onContinueAnyway,
@@ -404,42 +512,21 @@ function BootPanel({
         <>
           <div className="loading-screen__terminal-wrap">
             <div className="loading-screen__terminal" role="status" aria-live="polite">
-              {BOOT_SCHEDULE.lines.map((line) => (
-                <div
+              {BOOT_LINES.map((line, index) => (
+                <BootTerminalLine
                   key={line.id}
-                  className={`loading-screen__line is-${line.kind}`}
-                  style={{
-                    animationDelay: `${line.appearAt}ms`,
-                    animationDuration: `${line.anim}ms`,
-                  }}
-                >
-                  <span className="loading-screen__prompt">{'>'}</span>{' '}
-                  <span className="loading-screen__label">{line.label}</span>
-                  {line.dots && (
-                    <span className="loading-screen__dots"> {line.dots} </span>
-                  )}
-                  {line.status && (
-                    <span
-                      className={`loading-screen__status${
-                        line.statusTone ? ` is-${line.statusTone}` : ''
-                      }`}
-                      style={{
-                        animationDelay: `${line.statusAt}ms`,
-                        animationDuration: `${STATUS_ANIM_MS}ms`,
-                      }}
-                    >
-                      {line.status}
-                    </span>
-                  )}
-                </div>
+                  line={line}
+                  index={index}
+                  lineIndex={lineIndex}
+                  showStatus={showStatus}
+                />
               ))}
-              <div
-                className="loading-screen__line is-cursor"
-                style={{ animationDelay: `${BOOT_SCHEDULE.cursorAtMs}ms` }}
-              >
-                <span className="loading-screen__prompt">{'>'}</span>{' '}
-                <span className="loading-screen__blink">_</span>
-              </div>
+              {showCursor && (
+                <div className="loading-screen__line is-cursor is-visible">
+                  <span className="loading-screen__prompt">{'>'}</span>{' '}
+                  <span className="loading-screen__blink">_</span>
+                </div>
+              )}
             </div>
 
             <div
@@ -483,21 +570,31 @@ export default function LoadingScreen({ onBeforeFade, onDone }) {
   const [bootProgress, setBootProgress] = useState(0)
   /* boot → prompt (mobile only) → declined | exiting */
   const [phase, setPhase] = useState('boot')
+  const showBoot = phase === 'boot'
+  const { lineIndex, showStatus, sequenceDone } = useBootTerminal(showBoot)
+
+  const sequenceDoneRef = useRef(sequenceDone)
+  sequenceDoneRef.current = sequenceDone
 
   useEffect(() => {
     const minTime = new Promise((resolve) => setTimeout(resolve, MIN_VISIBLE_MS))
 
     let cancelled = false
     let exitTimer
-    let progressTimer
+    let sequencePoll
 
-    const progressStart = performance.now()
-    progressTimer = window.setInterval(() => {
-      if (cancelled) return
-      const elapsed = performance.now() - progressStart
-      const pct = Math.min(99, Math.round((elapsed / MIN_VISIBLE_MS) * 100))
-      setBootProgress(pct)
-    }, 120)
+    const sequenceReady = new Promise((resolve) => {
+      if (sequenceDoneRef.current) {
+        resolve()
+        return
+      }
+      sequencePoll = window.setInterval(() => {
+        if (sequenceDoneRef.current) {
+          window.clearInterval(sequencePoll)
+          resolve()
+        }
+      }, 40)
+    })
 
     const enterSite = async () => {
       if (cancelled) return
@@ -516,8 +613,9 @@ export default function LoadingScreen({ onBeforeFade, onDone }) {
       }, DOOR_REVEAL_MS)
     }
 
-    Promise.all([finalizeSiteBoot(), minTime]).then(() => {
+    Promise.all([finalizeSiteBoot(), minTime, sequenceReady]).then(() => {
       if (cancelled) return
+      setBootProgress(100)
       if (isMobileExperience()) {
         setPhase('prompt')
       } else {
@@ -528,9 +626,24 @@ export default function LoadingScreen({ onBeforeFade, onDone }) {
     return () => {
       cancelled = true
       if (exitTimer) window.clearTimeout(exitTimer)
-      if (progressTimer) window.clearInterval(progressTimer)
+      if (sequencePoll) window.clearInterval(sequencePoll)
     }
-  }, [onDone])
+  }, [onBeforeFade, onDone])
+
+  useEffect(() => {
+    if (!showBoot) return
+    const total = BOOT_LINES.length + 1
+    let frac = 0
+    if (lineIndex < 0) frac = 0
+    else if (lineIndex >= BOOT_LINES.length) frac = 1
+    else frac = (lineIndex + (showStatus ? 0.92 : 0.45)) / total
+    setBootProgress(Math.min(99, Math.round(frac * 100)))
+  }, [showBoot, lineIndex, showStatus])
+
+  useEffect(() => {
+    if (!showBoot || !sequenceDone) return
+    setBootProgress(100)
+  }, [showBoot, sequenceDone])
 
   const handleContinue = async () => {
     setBootProgress(100)
@@ -546,9 +659,9 @@ export default function LoadingScreen({ onBeforeFade, onDone }) {
     }, DOOR_REVEAL_MS)
   }
 
-  const showBoot = phase === 'boot'
   const showPrompt = phase === 'prompt'
   const showDeclined = phase === 'declined'
+  const showCursor = lineIndex >= BOOT_LINES.length
 
   const isRevealing = phase === 'exiting'
   const panelProps = {
@@ -556,6 +669,9 @@ export default function LoadingScreen({ onBeforeFade, onDone }) {
     showPrompt,
     showDeclined,
     bootProgress,
+    lineIndex,
+    showStatus,
+    showCursor,
     onContinue: handleContinue,
     onDecline: () => setPhase('declined'),
     onContinueAnyway: handleContinue,
