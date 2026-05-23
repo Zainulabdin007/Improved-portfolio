@@ -13,8 +13,8 @@
   position: relative;
   width: 100%;
   /* Extra runway so panel transitions are not rushed. */
-  height: 1380vh;
-  height: 1380svh;
+  height: 1480vh;
+  height: 1480svh;
   background: #050505;
   overflow: visible;
   isolation: isolate;

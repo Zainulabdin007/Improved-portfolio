@@ -182,7 +182,7 @@ const EXP_ENTER_OFFSET = 0.2
 /** Last card center at this viewport fraction before the tail scroll. */
 const LAST_CARD_VIEWPORT_X = 0.55
 /** Extra scroll past the last-card stop, as a fraction of that leg's travel. */
-const TAIL_AFTER_LAST_CARD = 0.25
+const TAIL_AFTER_LAST_CARD = 0.32
 /** Ease the first portion of experience scroll so the header glides in slowly. */
 const EXP_ENTER_EASE_FRAC = 0.4
 

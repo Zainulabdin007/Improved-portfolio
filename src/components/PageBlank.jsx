@@ -119,9 +119,17 @@ const PROJECTS = [
 const PAN_START = 0.62
 /* Extra scroll runway for the projects → contact transition (wide = slow pan) */
 const PAN_HEIGHT_PX = 3600
+/** Ease only the first slice so entry from experience feels soft but still moves immediately. */
+const PROJECTS_ENTRY_EASE_FRAC = 0.22
 
 const easeInOut = (t) =>
   t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+
+function projectsScrollProgress(p) {
+  const linear = p / PAN_START
+  if (linear >= PROJECTS_ENTRY_EASE_FRAC) return linear
+  return easeInOut(linear / PROJECTS_ENTRY_EASE_FRAC) * PROJECTS_ENTRY_EASE_FRAC
+}
 
 function useReveal() {
   const ref = useRef(null)
@@ -233,7 +241,6 @@ export default function PageBlank() {
       /* Total scroll required:
        *   pinH                         — initial sticky window
        * + maxScroll / PAN_START        — scroll needed to translate shell
-       *                                  through its content in 0..PAN_START
        * + PAN_HEIGHT_PX                — explicit pan runway after PAN_START
        */
       const sectionHeight = pinH + maxScroll / PAN_START + PAN_HEIGHT_PX
@@ -253,8 +260,7 @@ export default function PageBlank() {
         const p = self.progress
 
         if (p < PAN_START) {
-          const scrollProgress = p / PAN_START
-          /* Projects panel is second in the track — hold at -100vw */
+          const scrollProgress = projectsScrollProgress(p)
           track.style.transform = 'translate3d(-50%, 0, 0)'
           shell.style.transform = `translate3d(0, ${-scrollProgress * maxScroll}px, 0)`
         } else {
