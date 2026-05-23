@@ -464,6 +464,11 @@
   color: rgba(245, 245, 247, 0.82);
 }
 
+.project-card__highlights strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
 /* Tech stack chips */
 .project-card__stack {
   list-style: none;

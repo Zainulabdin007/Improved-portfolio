@@ -43,6 +43,7 @@ import {
 } from '../utils/hflowScrollPhases'
 import { markBootGate, signalScrollSetup } from '../utils/bootReadiness'
 import { resetScrollDrivenStyles } from '../utils/scrollNav'
+import { renderBoldSegments } from '../utils/renderBoldSegments'
 import { SCROLL_SCRUB_HFLOW } from '../utils/scrollConfig'
 import './PageHorizontalFlow.css'
 
@@ -228,17 +229,6 @@ function DinoModel({ positionRef, scrollActiveRef }) {
  *   Phase 2 (SPIN   → PAN2_END)   pan: computer → experience (-200vw)
  *   Phase 3 (PAN2   → 1)          header + cards strip scrolls horizontally
  */
-
-/** Wrap `**like this**` segments in <strong> for experience bullet highlights. */
-function renderBoldSegments(text) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g)
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i}>{part.slice(2, -2)}</strong>
-    }
-    return part
-  })
-}
 
 const EXPERIENCES = [
   {
