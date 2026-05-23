@@ -12,9 +12,9 @@
 
 .hero__hand {
   --hand-progress: 0;
-  --hand-width: var(--ref-hand-w, 400px);
-  --hand-height: var(--ref-hand-h, 760px);
-  --hand-scale: var(--ref-hand-mult, 3);
+  --hand-width: var(--ref-hand-w, 436px);
+  --hand-height: var(--ref-hand-h, 827px);
+  --hand-scale: var(--ref-hand-mult, 3.17);
   --hand-travel: calc(1920px * 1.2 * var(--ui-scale, 1));
   --hand-y-left: -46%;
   --hand-y-right: -44%;

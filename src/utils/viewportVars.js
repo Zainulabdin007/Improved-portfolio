@@ -7,6 +7,11 @@ export const REF_HEIGHT = 1080
 const SCALE_MIN = 0.68
 const SCALE_MAX = 1.18
 
+/** Hero hand layout @ 1920×1080 (before --ui-scale). Tune these to resize hands. */
+export const HAND_REF_W = 436
+export const HAND_REF_H = 827
+export const HAND_SCALE = 3.17
+
 const scaleListeners = new Set()
 
 function clamp(v, min, max) {
@@ -68,9 +73,9 @@ export function syncViewportVars() {
   root.style.setProperty('--site-height', `${h}px`)
 
   /* Reference design tokens × ui-scale (use in calc across CSS) */
-  root.style.setProperty('--ref-hand-w', `${400 * ui}px`)
-  root.style.setProperty('--ref-hand-h', `${760 * ui}px`)
-  root.style.setProperty('--ref-hand-mult', '3')
+  root.style.setProperty('--ref-hand-w', `${HAND_REF_W * ui}px`)
+  root.style.setProperty('--ref-hand-h', `${HAND_REF_H * ui}px`)
+  root.style.setProperty('--ref-hand-mult', String(HAND_SCALE))
   root.style.setProperty('--ref-grid-w', `${1400 * ui}px`)
   root.style.setProperty('--ref-grid-h', `${780 * ui}px`)
   root.style.setProperty('--ref-card-w', `${1280 * ui}px`)
@@ -113,9 +118,9 @@ export function syncHandLayoutVars(stageEl) {
 
   const ui = getUiScale(w, h)
 
-  const handWidth = Math.round(400 * ui)
-  const handHeight = Math.round(760 * ui)
-  const handMult = 3
+  const handWidth = Math.round(HAND_REF_W * ui)
+  const handHeight = Math.round(HAND_REF_H * ui)
+  const handMult = HAND_SCALE
   const travel = Math.round(REF_WIDTH * 1.2 * ui)
 
   stageEl.style.setProperty('--ui-scale', ui.toFixed(4))
