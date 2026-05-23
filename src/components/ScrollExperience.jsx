@@ -44,8 +44,9 @@ export default function ScrollExperience({ children }) {
             ease: 'none',
             scrollTrigger: {
               trigger: sphereSection,
-              start: 'top top',
-              end: '+=165%',
+              /* Start just before the pin locks; finish as the section ends (no dead tail) */
+              start: 'top 92%',
+              end: 'bottom bottom',
               scrub: SCROLL_SCRUB,
             },
           },

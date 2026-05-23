@@ -8,6 +8,15 @@
   overflow: visible;
 }
 
+/* Top wave sits in the pin layer so it does not eat scroll before the sphere sticks */
+.page-section--sphere > .hero-wave-divider--below {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+}
+
 /* Sticky inner viewport keeps the sphere centered while scrolling page 2 */
 .sphere-pin {
   position: sticky;

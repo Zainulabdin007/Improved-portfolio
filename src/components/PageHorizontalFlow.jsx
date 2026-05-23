@@ -36,6 +36,11 @@ import { TbCursorText } from 'react-icons/tb'
 import HeroWaveDivider from './HeroWaveDivider'
 import Waves from './Waves'
 import TopoPattern from './TopoPattern'
+import {
+  HFLOW_PAN1_END,
+  HFLOW_PAN2_END,
+  HFLOW_SPIN_END,
+} from '../utils/hflowScrollPhases'
 import { markBootGate, signalScrollSetup } from '../utils/bootReadiness'
 import { resetScrollDrivenStyles } from '../utils/scrollNav'
 import { SCROLL_SCRUB_HFLOW } from '../utils/scrollConfig'
@@ -80,6 +85,52 @@ const TECH_LOGOS = [
   { col: 7, row: 4, name: 'Git',          Icon: SiGit,          threshold: 0.91 },
   { col: 8, row: 4, name: 'Blender',      Icon: SiBlender,      threshold: 0.95 },
 ]
+
+/** Re-exported phase breakpoints live in hflowScrollPhases.js (nav shares PAN2_END). */
+const PAN1_END = HFLOW_PAN1_END
+const SPIN_END = HFLOW_SPIN_END
+const PAN2_END = HFLOW_PAN2_END
+/** Strip enter offset — 40% of prior 0.5 so the header appears sooner. */
+const EXP_ENTER_OFFSET = 0.2
+/** Last card rests just past center at section end — reads smoother than dead-center. */
+const LAST_CARD_VIEWPORT_X = 0.45
+/** No extra strip travel after the last card — avoids dead scroll at section end. */
+const TAIL_AFTER_LAST_CARD = 0
+/** Ease the first portion of experience scroll so the header glides in slowly. */
+const EXP_ENTER_EASE_FRAC = 0.4
+
+/** Dino world-x positions (see DinoModel group scale). */
+const DINO_OFFSCREEN_X = -3
+const DINO_WALK_START_X = -1.4
+const DINO_WALK_END_X = -0.4
+/** Fraction of phase-3 progress used for the on-screen walk after entry. */
+const DINO_WALK_SCROLL_FRAC = 0.38
+
+const easeInOut = (t) =>
+  t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+
+/** Dino glides in during the computer → experience pan; then walks across the panel. */
+function dinoPositionForProgress(p) {
+  if (p < SPIN_END) return DINO_OFFSCREEN_X
+
+  if (p < PAN2_END) {
+    const panProgress = easeInOut((p - SPIN_END) / (PAN2_END - SPIN_END))
+    return (
+      DINO_OFFSCREEN_X + panProgress * (DINO_WALK_START_X - DINO_OFFSCREEN_X)
+    )
+  }
+
+  const phase3 = (p - PAN2_END) / (1 - PAN2_END)
+  const walkT = Math.min(phase3 / DINO_WALK_SCROLL_FRAC, 1)
+  return DINO_WALK_START_X + easeInOut(walkT) * (DINO_WALK_END_X - DINO_WALK_START_X)
+}
+
+function experienceExpProgress(p) {
+  if (p < PAN2_END) return 0
+  const linear = (p - PAN2_END) / (1 - PAN2_END)
+  if (linear >= EXP_ENTER_EASE_FRAC) return linear
+  return easeInOut(linear / EXP_ENTER_EASE_FRAC) * EXP_ENTER_EASE_FRAC
+}
 
 function ComputerModel({ rotationRef }) {
   const { scene } = useGLTF(COMPUTER_URL)
@@ -135,12 +186,17 @@ function DinoModel({ positionRef, scrollActiveRef }) {
     }
   }, [actions, names])
 
+  const displayXRef = useRef(DINO_OFFSCREEN_X)
+
   useFrame(() => {
     if (!groupRef.current) return
-    const pos = positionRef.current
-    if (typeof pos !== 'number') return
+    const target = positionRef.current
+    if (typeof target !== 'number') return
 
-    groupRef.current.position.x = pos
+    const prev = displayXRef.current
+    const next = prev + (target - prev) * 0.22
+    displayXRef.current = next
+    groupRef.current.position.x = next
 
     // Pause the walk loop when the user isn't actively scrubbing. While
     // scrolling, the legs keep cycling — even if the dino has parked at the
@@ -172,29 +228,6 @@ function DinoModel({ positionRef, scrollActiveRef }) {
  *   Phase 2 (SPIN   → PAN2_END)   pan: computer → experience (-200vw)
  *   Phase 3 (PAN2   → 1)          header + cards strip scrolls horizontally
  */
-/** Wider window = slower horizontal pan between about and computer panels. */
-const PAN1_END = 0.24
-const SPIN_END = 0.55
-/** Pan computer → experience — wide window so the transition is slow and deliberate. */
-const PAN2_END = 0.72
-/** Strip enter offset — 40% of prior 0.5 so the header appears sooner. */
-const EXP_ENTER_OFFSET = 0.2
-/** Last card center at this viewport fraction before the tail scroll. */
-const LAST_CARD_VIEWPORT_X = 0.55
-/** Extra scroll past the last-card stop, as a fraction of that leg's travel. */
-const TAIL_AFTER_LAST_CARD = 0.32
-/** Ease the first portion of experience scroll so the header glides in slowly. */
-const EXP_ENTER_EASE_FRAC = 0.4
-
-const easeInOut = (t) =>
-  t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
-
-function experienceExpProgress(p) {
-  if (p < PAN2_END) return 0
-  const linear = (p - PAN2_END) / (1 - PAN2_END)
-  if (linear >= EXP_ENTER_EASE_FRAC) return linear
-  return easeInOut(linear / EXP_ENTER_EASE_FRAC) * EXP_ENTER_EASE_FRAC
-}
 
 /** Wrap `**like this**` segments in <strong> for experience bullet highlights. */
 function renderBoldSegments(text) {
@@ -324,17 +357,7 @@ export default function PageHorizontalFlow() {
           expStrip.style.transform = `translate3d(${x}px, 0, 0)`
         }
 
-        // Dino walks the FIRST third of his path during Phase 4, then parks.
-        // World x range while walking: -1.4 → -0.4 (left-of-center stop).
-        if (p < PAN2_END) {
-          dinoPosRef.current = -3 // parked off-screen left
-        } else {
-          const expProgress = Math.min((p - PAN2_END) / (1 - PAN2_END), 0.35)
-          // Linear scaling so the dino reaches his end position by p=0.35.
-          // After that he stays parked; the leg animation keeps going so
-          // long as the user is still scrolling (handled in DinoModel).
-          dinoPosRef.current = -1.4 + (expProgress / 0.35) * 1.0
-        }
+        dinoPosRef.current = dinoPositionForProgress(p)
       },
     })
 
@@ -430,20 +453,25 @@ export default function PageHorizontalFlow() {
                       '--threshold': logo.threshold,
                     }}
                   >
-                    {logo.Icon ? (
-                      <logo.Icon
-                        className="hflow-tile__svg"
-                        aria-hidden="true"
-                        focusable="false"
-                      />
-                    ) : (
-                      <img
-                        src={logo.src}
-                        alt={logo.name}
-                        className="hflow-tile__icon"
-                        loading="eager"
-                      />
-                    )}
+                    <div className="hflow-tile__content">
+                      <div className="hflow-tile__media">
+                        {logo.Icon ? (
+                          <logo.Icon
+                            className="hflow-tile__svg"
+                            aria-hidden="true"
+                            focusable="false"
+                          />
+                        ) : (
+                          <img
+                            src={logo.src}
+                            alt=""
+                            className="hflow-tile__icon"
+                            loading="eager"
+                          />
+                        )}
+                      </div>
+                      <span className="hflow-tile__label">{logo.name}</span>
+                    </div>
                   </li>
                 ))}
 
