@@ -36,7 +36,6 @@ import { TbCursorText } from 'react-icons/tb'
 import HeroWaveDivider from './HeroWaveDivider'
 import Waves from './Waves'
 import TopoPattern from './TopoPattern'
-import { readUiScale } from '../utils/viewportVars'
 import './PageHorizontalFlow.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -157,28 +156,21 @@ function DinoModel({ positionRef, scrollActiveRef }) {
 /*
  * Scroll choreography across 3 horizontal panels + 3 experience slides.
  *
- *   Phase 0 (0      → RISE_END)   about card rises from below
- *   Phase 1 (RISE   → PAN1_END)   pan: about → computer    (-100vw)
- *   Phase 2 (PAN1   → SPIN_END)   computer spins, logos reveal
- *   Phase 3 (SPIN   → PAN2_END)   pan: computer → experience (-200vw)
- *   Phase 4 (PAN2   → 1)          three experience slides cycle in/out
- *
- * Section is sized so each slide gets ~1 viewport of scroll inside Phase 4.
+ *   Phase 0 (0      → PAN1_END)   pan: about → computer    (-100vw)
+ *   Phase 1 (PAN1   → SPIN_END)   computer spins, logos reveal
+ *   Phase 2 (SPIN   → PAN2_END)   pan: computer → experience (-200vw)
+ *   Phase 3 (PAN2   → 1)          header + cards strip scrolls horizontally
  */
-const RISE_END = 0.1
 const PAN1_END = 0.2
 const SPIN_END = 0.55
-const PAN2_END = 0.65
-
-// Each slide animates through enter → dwell → exit windows on global progress.
-// Windows are widened slightly so the heavier scrub feels intentional rather
-// than rushed. The last slide has no exit so it stays visible at the bottom
-// of the section.
-const SLIDES = [
-  { enterStart: 0.65, enterEnd: 0.71, exitStart: 0.74, exitEnd: 0.80 },
-  { enterStart: 0.80, enterEnd: 0.84, exitStart: 0.87, exitEnd: 0.92 },
-  { enterStart: 0.92, enterEnd: 0.96, exitStart: null, exitEnd: null },
-]
+/** Pan computer → experience (halved again from 0.6 → 0.575). */
+const PAN2_END = 0.575
+/** Strip starts this far off-screen right (0.5 = half the former enter distance). */
+const EXP_ENTER_OFFSET = 0.5
+/** Last card center at this viewport fraction before the tail scroll. */
+const LAST_CARD_VIEWPORT_X = 0.55
+/** Extra scroll past the last-card stop, as a fraction of that leg's travel. */
+const TAIL_AFTER_LAST_CARD = 0.25
 
 const EXPERIENCES = [
   {
@@ -218,33 +210,26 @@ const EXPERIENCES = [
   },
 ]
 
-// Quadratic ease-out — fast lift, soft settle
-const easeOut = (t) => 1 - Math.pow(1 - t, 2)
-
-// Slides travel horizontally: enter from the right (+100%), dwell at 0,
-// exit to the left (-100%). Percentages are relative to the slide stack
-// width so motion stays proportional on every viewport.
-function computeSlideState(p, slide) {
-  const { enterStart, enterEnd, exitStart, exitEnd } = slide
-  if (p < enterStart) return { x: 100, opacity: 0 }
-  if (p < enterEnd) {
-    const t = easeOut((p - enterStart) / (enterEnd - enterStart))
-    return { x: (1 - t) * 100, opacity: t }
+function experienceStripX(viewport, strip, expP) {
+  const clipWidth = viewport.clientWidth
+  const startX = clipWidth * EXP_ENTER_OFFSET
+  const lastCard = strip.querySelector('.hflow-slide:last-child')
+  let lastCardX = startX - clipWidth * 0.5
+  if (lastCard) {
+    const lastCenter = lastCard.offsetLeft + lastCard.offsetWidth / 2
+    lastCardX = clipWidth * LAST_CARD_VIEWPORT_X - lastCenter
   }
-  if (exitStart === null || p < exitStart) return { x: 0, opacity: 1 }
-  if (p < exitEnd) {
-    const t = (p - exitStart) / (exitEnd - exitStart)
-    return { x: -t * 100, opacity: 1 - t }
-  }
-  return { x: -100, opacity: 0 }
+  const mainTravel = startX - lastCardX
+  const endX = lastCardX - mainTravel * TAIL_AFTER_LAST_CARD
+  return startX + expP * (endX - startX)
 }
 
 export default function PageHorizontalFlow() {
   const sectionRef = useRef(null)
   const trackRef = useRef(null)
-  const cardRef = useRef(null)
   const computerStageRef = useRef(null)
-  const slidesRef = useRef([])
+  const experienceViewportRef = useRef(null)
+  const experienceStripRef = useRef(null)
   const rotationRef = useRef(0)
   const dinoPosRef = useRef(-3) // starts off-screen left (world units)
   const scrollActiveRef = useRef(0) // timestamp of last scroll-trigger update
@@ -252,9 +237,8 @@ export default function PageHorizontalFlow() {
   useEffect(() => {
     const section = sectionRef.current
     const track = trackRef.current
-    const card = cardRef.current
     const stage = computerStageRef.current
-    if (!section || !track || !card || !stage) return
+    if (!section || !track || !stage) return
 
     const trigger = ScrollTrigger.create({
       trigger: section,
@@ -265,31 +249,20 @@ export default function PageHorizontalFlow() {
         const p = self.progress
         scrollActiveRef.current = performance.now()
 
-        if (p < RISE_END) {
-          // Phase 0 — about card rises into view
-          const t = easeOut(p / RISE_END)
-          const riseVh = 120 * readUiScale()
-          card.style.setProperty('--rise', `${(1 - t) * riseVh}vh`)
-          card.style.setProperty('--rise-opacity', String(t))
-          track.style.transform = 'translate3d(0, 0, 0)'
-          rotationRef.current = 0
-          stage.style.setProperty('--progress', '0')
-        } else if (p < PAN1_END) {
-          // Phase 1 — pan to computer
-          card.style.setProperty('--rise', '0vh')
-          card.style.setProperty('--rise-opacity', '1')
-          const panProgress = (p - RISE_END) / (PAN1_END - RISE_END)
+        if (p < PAN1_END) {
+          // Phase 0 — pan to computer (about card stays fixed)
+          const panProgress = p / PAN1_END
           track.style.transform = `translate3d(${-panProgress * (100 / 3)}%, 0, 0)`
           rotationRef.current = 0
           stage.style.setProperty('--progress', '0')
         } else if (p < SPIN_END) {
-          // Phase 2 — computer spin + logo reveal
+          // Phase 1 — computer spin + logo reveal
           track.style.transform = 'translate3d(-33.333%, 0, 0)'
           const spinProgress = (p - PAN1_END) / (SPIN_END - PAN1_END)
           rotationRef.current = spinProgress * Math.PI * 4
           stage.style.setProperty('--progress', String(spinProgress))
         } else if (p < PAN2_END) {
-          // Phase 3 — pan to experience
+          // Phase 2 — pan to experience
           track.style.transform = `translate3d(${
             -(100 / 3) -
             ((p - SPIN_END) / (PAN2_END - SPIN_END)) * (100 / 3)
@@ -297,21 +270,24 @@ export default function PageHorizontalFlow() {
           rotationRef.current = Math.PI * 4
           stage.style.setProperty('--progress', '1')
         } else {
-          // Phase 4 — experience panel pinned in view
+          // Phase 3 — experience panel pinned in view
           track.style.transform = 'translate3d(-66.666%, 0, 0)'
           rotationRef.current = Math.PI * 4
           stage.style.setProperty('--progress', '1')
         }
 
-        // Experience slides — always recomputed so they idle off-screen
-        // until Phase 4, then sequentially cycle in/out as scroll continues.
-        SLIDES.forEach((slide, i) => {
-          const el = slidesRef.current[i]
-          if (!el) return
-          const { x, opacity } = computeSlideState(p, slide)
-          el.style.transform = `translate3d(${x}%, 0, 0)`
-          el.style.opacity = String(opacity)
-        })
+        // Experience — header + cards pan together across the full viewport.
+        const expViewport = experienceViewportRef.current
+        const expStrip = experienceStripRef.current
+        if (expStrip && expViewport) {
+          const expP =
+            p >= PAN2_END ? (p - PAN2_END) / (1 - PAN2_END) : 0
+          const x =
+            p >= PAN2_END
+              ? experienceStripX(expViewport, expStrip, expP)
+              : experienceStripX(expViewport, expStrip, 0)
+          expStrip.style.transform = `translate3d(${x}px, 0, 0)`
+        }
 
         // Dino walks the FIRST third of his path during Phase 4, then parks.
         // World x range while walking: -1.4 → -0.4 (left-of-center stop).
@@ -358,7 +334,7 @@ export default function PageHorizontalFlow() {
                 yGap={36}
               />
             </div>
-            <article ref={cardRef} className="hflow-card">
+            <article className="hflow-card">
               <TopoPattern className="hflow-card__topo" />
               <div className="hflow-card__inner">
                 <div className="hflow-photo">
@@ -520,22 +496,21 @@ export default function PageHorizontalFlow() {
               </Canvas>
             </div>
 
-            <div className="hflow-experience">
-              <header className="hflow-experience__header">
-                <h2 className="hflow-experience__title">Where I've Worked</h2>
-                <p className="hflow-experience__lede">
-                  Three stops so far — from campus IT to full-stack
-                  engineering to clinical infrastructure.
-                </p>
-              </header>
+            <div
+              ref={experienceViewportRef}
+              className="hflow-experience-viewport"
+            >
+              <div ref={experienceStripRef} className="hflow-experience-strip">
+                <header className="hflow-experience__header">
+                  <h2 className="hflow-experience__title">Where I've Worked</h2>
+                  <p className="hflow-experience__lede">
+                    Three stops so far — from campus IT to full-stack
+                    engineering to clinical infrastructure.
+                  </p>
+                </header>
 
-              <div className="hflow-slides">
-                {EXPERIENCES.map((exp, i) => (
-                  <article
-                    key={exp.company}
-                    ref={(el) => (slidesRef.current[i] = el)}
-                    className="hflow-slide"
-                  >
+                {EXPERIENCES.map((exp) => (
+                  <article key={exp.company} className="hflow-slide">
                     <header className="hflow-slide__header">
                       <p className="hflow-slide__dates">{exp.dates}</p>
                       <h3 className="hflow-slide__role">{exp.title}</h3>

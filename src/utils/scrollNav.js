@@ -1,9 +1,9 @@
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-/** Progress into #about when the about card is settled (see PageHorizontalFlow RISE_END). */
-const ABOUT_PROGRESS = 0.08
-/** Past PAN2_END (0.65) so the pan finishes; first slide settled (~enterEnd 0.69). */
-const EXPERIENCE_PROGRESS = 0.73
+/** Start of #about — card is fixed in place (no rise animation). */
+const ABOUT_PROGRESS = 0
+/** Past PAN2_END (0.575) once the experience strip has scrolled into view. */
+const EXPERIENCE_PROGRESS = 0.62
 /** End of #projects + small overscroll so smooth scroll finishes the contact pan. */
 const CONTACT_PROGRESS = 1
 const CONTACT_EXTRA_PX = 120
