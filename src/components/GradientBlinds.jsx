@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Renderer, Program, Mesh, Triangle } from 'ogl'
+import { markBootGate } from '../utils/bootReadiness'
 import './GradientBlinds.css'
 
 const MAX_COLORS = 8
@@ -278,8 +279,13 @@ void main() {
     }
     window.addEventListener('pointermove', onPointerMove, { passive: true })
 
+    let gpuReady = false
     const loop = (t) => {
       rafRef.current = requestAnimationFrame(loop)
+      if (!gpuReady) {
+        gpuReady = true
+        markBootGate('gradientBlinds')
+      }
       uniforms.iTime.value = t * 0.001
       if (mouseDampening > 0) {
         if (!lastTimeRef.current) lastTimeRef.current = t

@@ -37,6 +37,7 @@ import HeroWaveDivider from './HeroWaveDivider'
 import Waves from './Waves'
 import TopoPattern from './TopoPattern'
 import { markBootGate, signalScrollSetup } from '../utils/bootReadiness'
+import { resetScrollDrivenStyles } from '../utils/scrollNav'
 import { SCROLL_SCRUB_HFLOW } from '../utils/scrollConfig'
 import './PageHorizontalFlow.css'
 
@@ -273,6 +274,8 @@ export default function PageHorizontalFlow() {
     const track = trackRef.current
     const stage = computerStageRef.current
     if (!section || !track || !stage) return
+
+    resetScrollDrivenStyles()
 
     const trigger = ScrollTrigger.create({
       trigger: section,

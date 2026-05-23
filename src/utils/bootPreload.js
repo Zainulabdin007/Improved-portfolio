@@ -9,6 +9,9 @@ const CRITICAL_IMAGES = [
   '/CSS3_logo.svg.png',
   '/openai.svg',
   '/Visual_Studio_Code_1.35_icon.svg.png',
+  '/Pics_to_add.jpg',
+  '/wanderers.png',
+  '/cooptrack.png',
 ]
 
 const GLTF_URLS = [GLB_URL, '/my_computer.glb', '/3d_chrome_dino_walking.glb']

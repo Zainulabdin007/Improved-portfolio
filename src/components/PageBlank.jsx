@@ -4,7 +4,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import HeroWaveDivider from './HeroWaveDivider'
 import GradientBlinds from './GradientBlinds'
 import BorderGlow from './BorderGlow'
-import { signalScrollSetup } from '../utils/bootReadiness'
+import { markBootGate, signalScrollSetup } from '../utils/bootReadiness'
+import { resetScrollDrivenStyles } from '../utils/scrollNav'
 import { SCROLL_SCRUB_HFLOW } from '../utils/scrollConfig'
 import './PageBlank.css'
 
@@ -216,6 +217,8 @@ export default function PageBlank() {
     const shell = shellRef.current
     if (!section || !track || !shell) return
 
+    resetScrollDrivenStyles()
+
     /*
      * Compute the section's pixel height dynamically so the projects shell
      * always gets enough scroll runway. Without this, on a tall mobile
@@ -239,6 +242,7 @@ export default function PageBlank() {
     }
 
     let maxScroll = measure()
+    markBootGate('projectsLayout')
 
     const trigger = ScrollTrigger.create({
       trigger: section,

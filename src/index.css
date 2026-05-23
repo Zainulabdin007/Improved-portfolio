@@ -32,6 +32,12 @@ html.is-booting,
 html.is-booting body {
   overflow: hidden !important;
   touch-action: none;
+  background: #0c0c14;
+}
+
+/* Keep content in the paint tree (WebGL needs this); loader covers it. */
+.site-shell--booting {
+  pointer-events: none;
 }
 
 body {

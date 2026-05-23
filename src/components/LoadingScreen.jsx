@@ -1,22 +1,53 @@
 import { useEffect, useState } from 'react'
-import { runBootPreload } from '../utils/bootPreload'
-import { waitForBootGates } from '../utils/bootReadiness'
+import { finalizeSiteBoot } from '../utils/bootReadiness'
 import './LoadingScreen.css'
 
+/**
+ * Terminal boot sequence — paced for readability and to cover real preload time.
+ * @type {Array<{ id: string, kind: string, label: string, dots?: string, status?: string, statusTone?: string }>}
+ */
 const BOOT_LINES = [
-  { kind: 'header', label: 'SYSTEM BOOT v1.0.0' },
-  { kind: 'pending', label: 'Initializing render pipeline ...' },
-  { kind: 'task', label: 'Loading geometry buffers', dots: '............', status: 'OK' },
-  { kind: 'task', label: 'Decompressing Draco meshes', dots: '..........', status: 'OK' },
-  { kind: 'task', label: 'Mounting aurora shaders', dots: '............', status: 'OK' },
-  { kind: 'task', label: 'Resolving typefaces', dots: '.................', status: 'OK' },
-  { kind: 'task', label: 'Calibrating waves', dots: '...................', status: 'OK' },
-  { kind: 'final', label: 'All systems online.' },
+  { id: 'hdr', kind: 'header', label: 'ZB PORTFOLIO · SYSTEM BOOT v2.4.1' },
+  { id: 'sub1', kind: 'subheader', label: '// CORE RUNTIME' },
+  { id: 'p0', kind: 'pending', label: 'Handshaking WebGL2 context ...' },
+  { id: 't0', kind: 'task', label: 'Allocating framebuffers', dots: '..............', status: 'OK', statusTone: 'ok' },
+  { id: 't1', kind: 'task', label: 'Binding aurora fragment shaders', dots: '..........', status: 'OK', statusTone: 'ok' },
+  { id: 't2', kind: 'task', label: 'Warming noise & gradient pipelines', dots: '........', status: 'READY', statusTone: 'cyan' },
+  { id: 'sub2', kind: 'subheader', label: '// 3D ASSET PIPELINE' },
+  { id: 'p1', kind: 'pending', label: 'Streaming Draco-compressed meshes ...' },
+  { id: 't3', kind: 'task', label: 'Parsing sphere morph targets', dots: '............', status: 'OK', statusTone: 'ok' },
+  { id: 't4', kind: 'task', label: 'Hydrating workstation GLB', dots: '..........', status: 'OK', statusTone: 'ok' },
+  { id: 't5', kind: 'task', label: 'Syncing chrome dino walk cycle', dots: '........', status: 'LOCK', statusTone: 'cyan' },
+  { id: 't6', kind: 'metric', label: 'VRAM budget', dots: '................', status: '1.2 GB', statusTone: 'muted' },
+  { id: 'sub3', kind: 'subheader', label: '// SCROLL CHOREOGRAPHY' },
+  { id: 'p2', kind: 'pending', label: 'Measuring pin zones & scrub curves ...' },
+  { id: 't7', kind: 'task', label: 'Calibrating horizontal flow track', dots: '..........', status: 'SYNC', statusTone: 'cyan' },
+  { id: 't8', kind: 'task', label: 'Indexing projects · contact panels', dots: '........', status: 'OK', statusTone: 'ok' },
+  { id: 't9', kind: 'task', label: 'Resetting scroll state to origin', dots: '..........', status: '0,0', statusTone: 'muted' },
+  { id: 't10', kind: 'task', label: 'Refreshing ScrollTrigger graph', dots: '........', status: 'DONE', statusTone: 'ok' },
+  { id: 'sub4', kind: 'subheader', label: '// MEDIA & TYPE' },
+  { id: 'p3', kind: 'pending', label: 'Prefetching textures & project stills ...' },
+  { id: 't11', kind: 'task', label: 'Resolving Google Fonts stack', dots: '............', status: 'OK', statusTone: 'ok' },
+  { id: 't12', kind: 'task', label: 'Decoding hero hand sprites', dots: '..........', status: 'OK', statusTone: 'ok' },
+  { id: 't13', kind: 'task', label: 'Compiling wave displacement fields', dots: '......', status: 'OK', statusTone: 'ok' },
+  { id: 'sub5', kind: 'subheader', label: '// FINAL CHECKS' },
+  { id: 'p4', kind: 'pending', label: 'Awaiting first hero frame composite ...' },
+  { id: 't14', kind: 'task', label: 'Validating scene readiness gates', dots: '........', status: '7/7', statusTone: 'cyan' },
+  { id: 't15', kind: 'task', label: 'Stabilizing viewport @ 1920 ref', dots: '......', status: '100%', statusTone: 'ok' },
+  { id: 'fin', kind: 'final', label: 'All systems online — entering experience.' },
 ]
 
-const LINE_DELAY_MS = 160
-const FADE_MS = 600
-const MIN_VISIBLE_MS = BOOT_LINES.length * LINE_DELAY_MS + 700
+const LINE_DELAY_MS = 240
+const POST_SEQUENCE_MS = 1600
+const MIN_BOOT_MS = 12000
+const FADE_MS = 700
+
+const SEQUENCE_MS = BOOT_LINES.length * LINE_DELAY_MS + POST_SEQUENCE_MS
+const MIN_VISIBLE_MS = Math.max(MIN_BOOT_MS, SEQUENCE_MS)
+
+function lineDelay(index) {
+  return index * LINE_DELAY_MS
+}
 
 /** Phones / small touch viewports — show opt-in before entering the site. */
 function isMobileExperience() {
@@ -139,17 +170,10 @@ function MobileDeclinedPanel({ onContinueAnyway }) {
   )
 }
 
-const BOOT_GATES = [
-  'aurora',
-  'heroGltf',
-  'hflowComputer',
-  'hflowDino',
-  'scrollLayout',
-]
-
-/** Boot overlay — waits for real assets, WebGL, GLTF, and scroll layout before unlock. */
-export default function LoadingScreen({ onDone }) {
+/** Boot overlay — waits for assets, paints hero under cover, then crossfades out. */
+export default function LoadingScreen({ onBeforeFade, onDone }) {
   const [done, setDone] = useState(false)
+  const [bootProgress, setBootProgress] = useState(0)
   /* boot → prompt (mobile only) → declined | exiting */
   const [phase, setPhase] = useState('boot')
 
@@ -158,8 +182,24 @@ export default function LoadingScreen({ onDone }) {
 
     let cancelled = false
     let exitTimer
+    let progressTimer
 
-    const enterSite = () => {
+    const progressStart = performance.now()
+    progressTimer = window.setInterval(() => {
+      if (cancelled) return
+      const elapsed = performance.now() - progressStart
+      const pct = Math.min(99, Math.round((elapsed / MIN_VISIBLE_MS) * 100))
+      setBootProgress(pct)
+    }, 120)
+
+    const enterSite = async () => {
+      if (cancelled) return
+      setBootProgress(100)
+      try {
+        await onBeforeFade?.()
+      } catch {
+        /* still reveal if paint wait fails */
+      }
       if (cancelled) return
       setPhase('exiting')
       setDone(true)
@@ -168,28 +208,29 @@ export default function LoadingScreen({ onDone }) {
       }, FADE_MS)
     }
 
-    const bootReady = Promise.all([
-      runBootPreload(),
-      waitForBootGates(BOOT_GATES),
-      minTime,
-    ])
-
-    bootReady.then(() => {
+    Promise.all([finalizeSiteBoot(), minTime]).then(() => {
       if (cancelled) return
       if (isMobileExperience()) {
         setPhase('prompt')
       } else {
-        enterSite()
+        void enterSite()
       }
     })
 
     return () => {
       cancelled = true
       if (exitTimer) window.clearTimeout(exitTimer)
+      if (progressTimer) window.clearInterval(progressTimer)
     }
   }, [onDone])
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    setBootProgress(100)
+    try {
+      await onBeforeFade?.()
+    } catch {
+      /* still reveal */
+    }
     setPhase('exiting')
     setDone(true)
     window.setTimeout(() => onDone?.(), FADE_MS)
@@ -209,29 +250,56 @@ export default function LoadingScreen({ onDone }) {
       <div className="loading-screen__inner">
         {showBoot && (
           <>
-            <div className="loading-screen__terminal" role="status" aria-live="polite">
-              {BOOT_LINES.map((line, i) => (
+            <div className="loading-screen__terminal-wrap">
+              <div className="loading-screen__terminal" role="status" aria-live="polite">
+                {BOOT_LINES.map((line, i) => (
+                  <div
+                    key={line.id}
+                    className={`loading-screen__line is-${line.kind}`}
+                    style={{ animationDelay: `${lineDelay(i)}ms` }}
+                  >
+                    <span className="loading-screen__prompt">{'>'}</span>{' '}
+                    <span className="loading-screen__label">{line.label}</span>
+                    {line.dots && (
+                      <span className="loading-screen__dots"> {line.dots} </span>
+                    )}
+                    {line.status && (
+                      <span
+                        className={`loading-screen__status${
+                          line.statusTone ? ` is-${line.statusTone}` : ''
+                        }`}
+                      >
+                        {line.status}
+                      </span>
+                    )}
+                  </div>
+                ))}
                 <div
-                  key={line.label}
-                  className={`loading-screen__line is-${line.kind}`}
-                  style={{ animationDelay: `${i * LINE_DELAY_MS}ms` }}
+                  className="loading-screen__line is-cursor"
+                  style={{ animationDelay: `${lineDelay(BOOT_LINES.length)}ms` }}
                 >
                   <span className="loading-screen__prompt">{'>'}</span>{' '}
-                  <span className="loading-screen__label">{line.label}</span>
-                  {line.dots && (
-                    <span className="loading-screen__dots"> {line.dots} </span>
-                  )}
-                  {line.status && (
-                    <span className="loading-screen__status">{line.status}</span>
-                  )}
+                  <span className="loading-screen__blink">_</span>
                 </div>
-              ))}
+              </div>
+
               <div
-                className="loading-screen__line is-cursor"
-                style={{ animationDelay: `${BOOT_LINES.length * LINE_DELAY_MS}ms` }}
+                className="loading-screen__progress"
+                role="progressbar"
+                aria-valuenow={bootProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Boot progress"
               >
-                <span className="loading-screen__prompt">{'>'}</span>{' '}
-                <span className="loading-screen__blink">_</span>
+                <div className="loading-screen__progress-track">
+                  <div
+                    className="loading-screen__progress-fill"
+                    style={{ width: `${bootProgress}%` }}
+                  />
+                </div>
+                <span className="loading-screen__progress-label">
+                  SYS_LOAD {String(bootProgress).padStart(3, ' ')}%
+                </span>
               </div>
             </div>
 

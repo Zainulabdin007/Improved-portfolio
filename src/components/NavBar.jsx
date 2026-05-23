@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { NAV_ITEMS, initNavFromHash, scrollToNavItem } from '../utils/scrollNav'
+import { NAV_ITEMS, scrollToNavItem } from '../utils/scrollNav'
 import './NavBar.css'
 
 const TRACK_SRC = '/Calima - Autumn Bliss (freetouse.com).mp3'
@@ -23,10 +23,7 @@ export default function NavBar() {
   const [playing, setPlaying] = useState(false)
 
   useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      ScrollTrigger.refresh()
-      initNavFromHash()
-    })
+    const id = requestAnimationFrame(() => ScrollTrigger.refresh())
     return () => cancelAnimationFrame(id)
   }, [])
 

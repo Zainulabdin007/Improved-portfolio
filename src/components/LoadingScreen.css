@@ -18,6 +18,7 @@
 .loading-screen.is-done {
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
 }
 
 .loading-screen__scanlines {
@@ -59,13 +60,33 @@
 
 /* ----- Terminal ----- */
 
-.loading-screen__terminal {
+.loading-screen__terminal-wrap {
   flex: 1 1 auto;
-  max-width: 520px;
-  font-size: clamp(0.78rem, 1vw, 0.95rem);
-  line-height: 1.95;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.loading-screen__terminal {
+  max-height: min(58vh, 520px);
+  overflow-y: auto;
+  padding-right: 6px;
+  font-size: clamp(0.72rem, 0.95vw, 0.9rem);
+  line-height: 1.85;
   letter-spacing: 0.02em;
   white-space: pre;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232, 255, 54, 0.35) transparent;
+}
+
+.loading-screen__terminal::-webkit-scrollbar {
+  width: 5px;
+}
+
+.loading-screen__terminal::-webkit-scrollbar-thumb {
+  background: rgba(232, 255, 54, 0.35);
+  border-radius: 99px;
 }
 
 .loading-screen__line {
@@ -90,6 +111,58 @@
   color: #66ff9c;
   font-weight: 500;
   text-shadow: 0 0 8px rgba(102, 255, 156, 0.35);
+}
+
+.loading-screen__status.is-cyan {
+  color: #7cf9ff;
+  text-shadow: 0 0 8px rgba(124, 249, 255, 0.35);
+}
+
+.loading-screen__status.is-muted {
+  color: rgba(245, 245, 247, 0.45);
+  text-shadow: none;
+  font-weight: 400;
+}
+
+.loading-screen__line.is-subheader {
+  margin-top: 10px;
+}
+
+.loading-screen__line.is-subheader .loading-screen__label {
+  color: rgba(232, 255, 54, 0.72);
+  letter-spacing: 0.12em;
+  font-size: 0.68em;
+}
+
+.loading-screen__line.is-metric .loading-screen__label {
+  color: rgba(245, 245, 247, 0.82);
+}
+
+.loading-screen__progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loading-screen__progress-track {
+  height: 3px;
+  border-radius: 99px;
+  background: rgba(245, 245, 247, 0.1);
+  overflow: hidden;
+}
+
+.loading-screen__progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5227ff, #7cff67, #e8ff36);
+  box-shadow: 0 0 12px rgba(124, 255, 156, 0.45);
+  transition: width 0.18s ease-out;
+}
+
+.loading-screen__progress-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  color: rgba(245, 245, 247, 0.42);
 }
 
 /* Header line — amber accent */
