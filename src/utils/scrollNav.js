@@ -34,6 +34,9 @@ export function resetScrollDrivenStyles() {
   const hflowStage = document.querySelector('.hflow-stage')
   if (hflowStage) hflowStage.style.setProperty('--progress', '0')
 
+  const hflowComputer = document.querySelector('.hflow-panel--computer')
+  if (hflowComputer) hflowComputer.style.setProperty('--enter', '0')
+
   const expStrip = document.querySelector('.hflow-experience-strip')
   if (expStrip) expStrip.style.transform = 'translate3d(0px, 0, 0)'
 

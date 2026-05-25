@@ -1,9 +1,9 @@
-/* Tall scroll zone — extra height slows the hero → sphere page transition. */
+/* Tall scroll zone — extra height slows hero → sphere and sphere → about handoffs. */
 .page-section--sphere {
   position: relative;
   width: 100%;
-  height: 340vh;
-  height: 340svh;
+  height: 385vh;
+  height: 385svh; /* sync: SPHERE_SECTION_SCROLL_SVH in scrollConfig.js */
   background: #f5f5f7;
   overflow: visible;
 }

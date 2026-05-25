@@ -2,7 +2,7 @@ import { useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { signalScrollSetup } from '../utils/bootReadiness'
-import { SCROLL_SCRUB } from '../utils/scrollConfig'
+import { SCROLL_SCRUB, SPHERE_HANDS_SCROLL_END } from '../utils/scrollConfig'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -32,7 +32,7 @@ export default function ScrollExperience({ children }) {
       }
 
       // Page 2: scrub hands in from off-screen as the sphere is pinned.
-      // Extended runway so hands glide in slowly across the page-2 transition.
+      // Hands finish before the section ends so extra page-2 height only slows sphere → about.
       const sphereSection = document.querySelector('#page-2')
       const hands = document.querySelectorAll('#page-2 .hero__hand')
       if (sphereSection && hands.length) {
@@ -44,9 +44,8 @@ export default function ScrollExperience({ children }) {
             ease: 'none',
             scrollTrigger: {
               trigger: sphereSection,
-              /* Start just before the pin locks; finish as the section ends (no dead tail) */
               start: 'top 92%',
-              end: 'bottom bottom',
+              end: SPHERE_HANDS_SCROLL_END,
               scrub: SCROLL_SCRUB,
             },
           },

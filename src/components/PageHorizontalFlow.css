@@ -13,8 +13,8 @@
   position: relative;
   width: 100%;
   /* Extra runway so panel transitions are not rushed. */
-  height: 1480vh;
-  height: 1480svh;
+  height: 1560vh;
+  height: 1560svh;
   background: #050505;
   overflow: visible;
   isolation: isolate;
@@ -64,7 +64,27 @@
   background: #ffd500; /* vibrant yellow */
 }
 .hflow-panel--computer {
+  --enter: 0;
   background: #050505; /* deep black */
+}
+
+/* Fade + slide from the right — same easing family as project cards / logo tiles */
+.hflow-panel--computer > .hflow-panel__bg,
+.hflow-panel--computer > .hflow-stage {
+  opacity: var(--enter);
+  transform: translate3d(calc((1 - var(--enter)) * clamp(48px, 8vw, 96px)), 0, 0);
+  transition: opacity 0.15s linear, transform 0.2s ease;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hflow-panel--computer > .hflow-panel__bg,
+  .hflow-panel--computer > .hflow-stage {
+    --enter: 1 !important;
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 .hflow-panel--experience {
   /* Sunset → magenta → indigo → midnight — continues warm story from

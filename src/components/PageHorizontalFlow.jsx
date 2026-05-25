@@ -37,6 +37,7 @@ import HeroWaveDivider from './HeroWaveDivider'
 import Waves from './Waves'
 import TopoPattern from './TopoPattern'
 import {
+  HFLOW_ABOUT_HOLD_END,
   HFLOW_PAN1_END,
   HFLOW_PAN2_END,
   HFLOW_SPIN_END,
@@ -88,6 +89,7 @@ const TECH_LOGOS = [
 ]
 
 /** Re-exported phase breakpoints live in hflowScrollPhases.js (nav shares PAN2_END). */
+const ABOUT_HOLD_END = HFLOW_ABOUT_HOLD_END
 const PAN1_END = HFLOW_PAN1_END
 const SPIN_END = HFLOW_SPIN_END
 const PAN2_END = HFLOW_PAN2_END
@@ -224,7 +226,8 @@ function DinoModel({ positionRef, scrollActiveRef }) {
 /*
  * Scroll choreography across 3 horizontal panels + 3 experience slides.
  *
- *   Phase 0 (0      → PAN1_END)   pan: about → computer    (-100vw)
+ *   Phase 0a (0           → HOLD_END) about pinned (dwell)
+ *   Phase 0b (HOLD_END    → PAN1_END) computer fades in from the right + pan
  *   Phase 1 (PAN1   → SPIN_END)   computer spins, logos reveal
  *   Phase 2 (SPIN   → PAN2_END)   pan: computer → experience (-200vw)
  *   Phase 3 (PAN2   → 1)          header + cards strip scrolls horizontally
@@ -285,6 +288,7 @@ function experienceStripX(viewport, strip, expP) {
 export default function PageHorizontalFlow() {
   const sectionRef = useRef(null)
   const trackRef = useRef(null)
+  const computerPanelRef = useRef(null)
   const computerStageRef = useRef(null)
   const experienceViewportRef = useRef(null)
   const experienceStripRef = useRef(null)
@@ -309,19 +313,32 @@ export default function PageHorizontalFlow() {
         const p = self.progress
         scrollActiveRef.current = performance.now()
 
-        if (p < PAN1_END) {
-          // Phase 0 — pan to computer (about card stays fixed)
-          const panProgress = easeInOut(p / PAN1_END)
-          track.style.transform = `translate3d(${-panProgress * (100 / 3)}%, 0, 0)`
+        const computerPanel = computerPanelRef.current
+
+        if (p < ABOUT_HOLD_END) {
+          // Phase 0a — about card only (extra scroll runway)
+          track.style.transform = 'translate3d(0, 0, 0)'
+          computerPanel?.style.setProperty('--enter', '0')
+          rotationRef.current = 0
+          stage.style.setProperty('--progress', '0')
+        } else if (p < PAN1_END) {
+          // Phase 0b — computer fades/slides in from the right (see CSS --enter)
+          const enterT = easeInOut(
+            (p - ABOUT_HOLD_END) / (PAN1_END - ABOUT_HOLD_END),
+          )
+          track.style.transform = `translate3d(${-enterT * (100 / 3)}%, 0, 0)`
+          computerPanel?.style.setProperty('--enter', String(enterT))
           rotationRef.current = 0
           stage.style.setProperty('--progress', '0')
         } else if (p < SPIN_END) {
+          computerPanel?.style.setProperty('--enter', '1')
           // Phase 1 — computer spin + logo reveal
           track.style.transform = 'translate3d(-33.333%, 0, 0)'
           const spinProgress = (p - PAN1_END) / (SPIN_END - PAN1_END)
           rotationRef.current = spinProgress * Math.PI * 4
           stage.style.setProperty('--progress', String(spinProgress))
         } else if (p < PAN2_END) {
+          computerPanel?.style.setProperty('--enter', '1')
           // Phase 2 — pan to experience (eased; short gap kept at 60% reduction)
           const panProgress = easeInOut(
             (p - SPIN_END) / (PAN2_END - SPIN_END),
@@ -332,6 +349,7 @@ export default function PageHorizontalFlow() {
           rotationRef.current = Math.PI * 4
           stage.style.setProperty('--progress', '1')
         } else {
+          computerPanel?.style.setProperty('--enter', '1')
           // Phase 3 — experience panel pinned in view
           track.style.transform = 'translate3d(-66.666%, 0, 0)'
           rotationRef.current = Math.PI * 4
@@ -414,7 +432,10 @@ export default function PageHorizontalFlow() {
           </div>
 
           {/* Panel 2 — Computer scene on dark black + orange */}
-          <div className="hflow-panel hflow-panel--computer">
+          <div
+            ref={computerPanelRef}
+            className="hflow-panel hflow-panel--computer"
+          >
             <div className="hflow-panel__bg" aria-hidden="true">
               <Waves
                 lineColor="rgba(251, 146, 60, 0.22)"
