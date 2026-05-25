@@ -1,5 +1,8 @@
 /** Scroll progress breakpoints for #about — keep in sync with PageHorizontalFlow.jsx */
 
+/** About card fades in from the right as the section pins (scroll down). */
+export const HFLOW_ABOUT_ENTER_END = 0.05
+
 /** About card pinned with no pan — extra time to read before computer enters. */
 export const HFLOW_ABOUT_HOLD_END = 0.07
 

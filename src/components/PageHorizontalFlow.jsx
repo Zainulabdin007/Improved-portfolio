@@ -37,6 +37,7 @@ import HeroWaveDivider from './HeroWaveDivider'
 import Waves from './Waves'
 import TopoPattern from './TopoPattern'
 import {
+  HFLOW_ABOUT_ENTER_END,
   HFLOW_ABOUT_HOLD_END,
   HFLOW_PAN1_END,
   HFLOW_PAN2_END,
@@ -89,6 +90,7 @@ const TECH_LOGOS = [
 ]
 
 /** Re-exported phase breakpoints live in hflowScrollPhases.js (nav shares PAN2_END). */
+const ABOUT_ENTER_END = HFLOW_ABOUT_ENTER_END
 const ABOUT_HOLD_END = HFLOW_ABOUT_HOLD_END
 const PAN1_END = HFLOW_PAN1_END
 const SPIN_END = HFLOW_SPIN_END
@@ -111,6 +113,45 @@ const DINO_WALK_SCROLL_FRAC = 0.38
 
 const easeInOut = (t) =>
   t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+
+/**
+ * About card opacity + horizontal offset (× CSS shift).
+ * +1 = off to the right, 0 = centered, -1 = off to the left.
+ * Direction-aware so scrolling back in always enters from the right.
+ */
+function aboutCardMotion(p, scrollingDown) {
+  if (p < ABOUT_ENTER_END) {
+    const localT = p / ABOUT_ENTER_END
+    const t = easeInOut(localT)
+    if (scrollingDown) {
+      return { opacity: t, x: 1 - t }
+    }
+    return { opacity: t, x: -(1 - t) }
+  }
+
+  if (p < ABOUT_HOLD_END) {
+    return { opacity: 1, x: 0 }
+  }
+
+  if (p < PAN1_END) {
+    const localT = (p - ABOUT_HOLD_END) / (PAN1_END - ABOUT_HOLD_END)
+    if (scrollingDown) {
+      const t = easeInOut(localT)
+      return { opacity: 1 - t, x: -t }
+    }
+    const t = easeInOut(1 - localT)
+    return { opacity: t, x: 1 - t }
+  }
+
+  return { opacity: 0, x: -1 }
+}
+
+function applyAboutCardMotion(card, p, scrollingDown) {
+  if (!card) return
+  const { opacity, x } = aboutCardMotion(p, scrollingDown)
+  card.style.setProperty('--about-opacity', String(opacity))
+  card.style.setProperty('--about-x', String(x))
+}
 
 /** Dino glides in during the computer → experience pan; then walks across the panel. */
 function dinoPositionForProgress(p) {
@@ -288,8 +329,10 @@ function experienceStripX(viewport, strip, expP) {
 export default function PageHorizontalFlow() {
   const sectionRef = useRef(null)
   const trackRef = useRef(null)
+  const aboutCardRef = useRef(null)
   const computerPanelRef = useRef(null)
   const computerStageRef = useRef(null)
+  const prevProgressRef = useRef(0)
   const experienceViewportRef = useRef(null)
   const experienceStripRef = useRef(null)
   const rotationRef = useRef(0)
@@ -311,9 +354,12 @@ export default function PageHorizontalFlow() {
       scrub: SCROLL_SCRUB_HFLOW,
       onUpdate: (self) => {
         const p = self.progress
+        const scrollingDown = p >= prevProgressRef.current
+        prevProgressRef.current = p
         scrollActiveRef.current = performance.now()
 
         const computerPanel = computerPanelRef.current
+        applyAboutCardMotion(aboutCardRef.current, p, scrollingDown)
 
         if (p < ABOUT_HOLD_END) {
           // Phase 0a — about card only (extra scroll runway)
@@ -369,6 +415,9 @@ export default function PageHorizontalFlow() {
       },
     })
 
+    applyAboutCardMotion(aboutCardRef.current, trigger.progress, true)
+    prevProgressRef.current = trigger.progress
+
     signalScrollSetup('page-horizontal-flow')
 
     return () => trigger.kill()
@@ -402,7 +451,7 @@ export default function PageHorizontalFlow() {
                 yGap={36}
               />
             </div>
-            <article className="hflow-card">
+            <article ref={aboutCardRef} className="hflow-card">
               <TopoPattern className="hflow-card__topo" />
               <div className="hflow-card__inner">
                 <div className="hflow-photo">
