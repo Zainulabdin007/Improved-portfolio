@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react'
-import { syncHandLayoutVars } from '../utils/viewportVars'
+import { onViewportScaleChange, syncHandLayoutVars } from '../utils/viewportVars'
 import './HeroHands.css'
 
 const HAND_SRC = '/improveLeft.png'
@@ -28,8 +28,12 @@ export default function HeroHands({ layoutRootClass = 'hero__stage' }) {
 
     const ro = new ResizeObserver(update)
     ro.observe(stage)
+    const off = onViewportScaleChange(update)
 
-    return () => ro.disconnect()
+    return () => {
+      ro.disconnect()
+      off()
+    }
   }, [layoutRootClass])
 
   return (

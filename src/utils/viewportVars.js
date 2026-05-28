@@ -18,16 +18,42 @@ function clamp(v, min, max) {
   return Math.min(Math.max(v, min), max)
 }
 
+/** Layout viewport in CSS px (tracks resolution + browser zoom). */
+export function getViewportSize() {
+  if (typeof window === 'undefined') {
+    return { width: REF_WIDTH, height: REF_HEIGHT }
+  }
+  const vv = window.visualViewport
+  return {
+    width: vv?.width ?? window.innerWidth,
+    height: vv?.height ?? window.innerHeight,
+  }
+}
+
 /**
  * Uniform scale vs 1920×1080. Uses the smaller of width/height ratio so
  * the layout always fits the viewport and keeps the same proportions.
  */
-export function getUiScale(
-  w = typeof window !== 'undefined' ? window.innerWidth : REF_WIDTH,
-  h = typeof window !== 'undefined' ? window.innerHeight : REF_HEIGHT,
-) {
-  if (w <= 0 || h <= 0) return 1
-  return clamp(Math.min(w / REF_WIDTH, h / REF_HEIGHT), SCALE_MIN, SCALE_MAX)
+export function getUiScale(w, h) {
+  const size =
+    w == null || h == null ? getViewportSize() : { width: w, height: h }
+  const width = size.width
+  const height = size.height
+  if (width <= 0 || height <= 0) return 1
+  return clamp(
+    Math.min(width / REF_WIDTH, height / REF_HEIGHT),
+    SCALE_MIN,
+    SCALE_MAX,
+  )
+}
+
+/** Scale for a pinned stage / canvas host (uses its box, not the full window). */
+export function getUiScaleForElement(el) {
+  if (!el) return getUiScale()
+  const w = el.clientWidth
+  const h = el.clientHeight
+  if (w <= 0 || h <= 0) return getUiScale()
+  return getUiScale(w, h)
 }
 
 /** Read the live --ui-scale from :root (after syncViewportVars). */
@@ -57,8 +83,7 @@ function notifyScaleListeners() {
 export function syncViewportVars() {
   if (typeof window === 'undefined') return
 
-  const w = window.innerWidth
-  const h = window.innerHeight
+  const { width: w, height: h } = getViewportSize()
   const vmin = Math.min(w, h)
   const vmax = Math.max(w, h)
   const ui = getUiScale(w, h)
@@ -88,7 +113,9 @@ export function initViewportVars() {
   const run = () => {
     const next = getUiScale()
     syncViewportVars()
-    document.querySelectorAll('.hero__stage').forEach(syncHandLayoutVars)
+    document
+      .querySelectorAll('.hero__stage, .sphere-pin')
+      .forEach(syncHandLayoutVars)
 
     if (Math.abs(next - lastScale) > 0.001) {
       lastScale = next
@@ -101,9 +128,19 @@ export function initViewportVars() {
   window.addEventListener('resize', run, { passive: true })
   window.addEventListener('orientationchange', run, { passive: true })
 
+  const vv = window.visualViewport
+  if (vv) {
+    vv.addEventListener('resize', run, { passive: true })
+    vv.addEventListener('scroll', run, { passive: true })
+  }
+
   return () => {
     window.removeEventListener('resize', run)
     window.removeEventListener('orientationchange', run)
+    if (vv) {
+      vv.removeEventListener('resize', run)
+      vv.removeEventListener('scroll', run)
+    }
     scaleListeners.clear()
   }
 }
@@ -120,13 +157,13 @@ export function syncHandLayoutVars(stageEl) {
 
   const handWidth = Math.round(HAND_REF_W * ui)
   const handHeight = Math.round(HAND_REF_H * ui)
-  const handMult = HAND_SCALE
   const travel = Math.round(REF_WIDTH * 1.2 * ui)
 
   stageEl.style.setProperty('--ui-scale', ui.toFixed(4))
+  stageEl.style.setProperty('--watcard-ui-scale', ui.toFixed(4))
   stageEl.style.setProperty('--hand-width', `${handWidth}px`)
   stageEl.style.setProperty('--hand-height', `${handHeight}px`)
-  stageEl.style.setProperty('--hand-scale', String(handMult))
+  stageEl.style.setProperty('--hand-scale', String(HAND_SCALE))
   stageEl.style.setProperty('--hand-travel', `${travel}px`)
   stageEl.style.setProperty('--hand-edge-left', `${Math.round(-REF_WIDTH * 0.04 * ui)}px`)
   stageEl.style.setProperty('--hand-edge-right', `${Math.round(-REF_WIDTH * 0.01 * ui)}px`)

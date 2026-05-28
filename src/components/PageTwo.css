@@ -1,70 +1,128 @@
-/* Tall scroll zone — extra height slows hero → sphere and sphere → about handoffs. */
-.page-section--sphere {
-  position: relative;
-  width: 100%;
-  height: 385vh;
-  height: 385svh; /* sync: SPHERE_SECTION_SCROLL_SVH in scrollConfig.js */
-  background: #000000;
-  overflow: visible;
-}
-
-/* Top wave sits in the pin layer so it does not eat scroll before the sphere sticks */
-.page-section--sphere > .hero-wave-divider--below {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 6;
-}
-
-/* Sticky inner viewport keeps the WATCARD centered while scrolling page 2 */
-.sphere-pin {
-  position: sticky;
-  top: 0;
-  width: 100%;
-  height: 100vh;
-  height: 100svh;
-  overflow: visible;
-  isolation: isolate;
-  z-index: 0;
-  background: #000000;
-  --ui-scale: 1;
-  --hand-travel: calc(1920px * 1.2 * var(--ui-scale, 1));
-}
-
-/* Interactive wave mesh — same setup as computer panel, black + yellow lines */
-.sphere-pin__bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.sphere-pin__bg .waves::before {
-  background: rgba(255, 214, 0, 0.28);
-}
-
-.sphere-pin .hero__stage {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-}
-
-/* Hands sit above WebGL */
-.sphere-pin .hero__hands {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-}
-
-.page-section--sphere .hero__hand__img {
-  mix-blend-mode: lighten;
-  -webkit-mix-blend-mode: lighten;
-  filter: brightness(1.12) contrast(1.05);
-}
-
+/* Tall scroll zone — pin + hand scrub; keep in sync with scrollConfig SPHERE_SECTION_SCROLL_SVH */
+
+.page-section--sphere {
+
+  position: relative;
+
+  width: 100%;
+
+  height: 270vh;
+
+  height: 270svh; /* sync: SPHERE_SECTION_SCROLL_SVH in scrollConfig.js */
+
+  background: #000000;
+
+  overflow: visible;
+
+}
+
+
+
+/* Top wave sits in the pin layer so it does not eat scroll before the sphere sticks */
+
+.page-section--sphere > .hero-wave-divider--below {
+
+  position: absolute;
+
+  top: 0;
+
+  left: 0;
+
+  right: 0;
+
+  z-index: 6;
+
+}
+
+
+
+/* Sticky inner viewport keeps the WATCARD centered while scrolling page 2 */
+
+.sphere-pin {
+
+  position: sticky;
+
+  top: 0;
+
+  width: 100%;
+
+  height: 100vh;
+
+  height: 100svh;
+
+  overflow: visible;
+
+  isolation: isolate;
+
+  z-index: 0;
+
+  background: #000000;
+
+  --ui-scale: 1;
+
+  --watcard-ui-scale: 1;
+
+  --hand-travel: calc(1920px * 1.2 * var(--ui-scale, 1));
+
+}
+
+
+
+/* RippleGrid WebGL background */
+
+.sphere-pin__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: #000000;
+}
+
+
+
+.sphere-pin .hero__stage {
+
+  position: relative;
+
+  z-index: 1;
+
+  width: 100%;
+
+  height: 100%;
+
+  overflow: visible;
+
+  pointer-events: none;
+
+}
+
+
+
+/* Hands sit above WebGL */
+
+.sphere-pin .hero__hands {
+
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 5;
+
+  pointer-events: none;
+
+}
+
+
+
+.page-section--sphere .hero__hand__img {
+
+  mix-blend-mode: lighten;
+
+  -webkit-mix-blend-mode: lighten;
+
+  filter: brightness(1.12) contrast(1.05);
+
+}
+
+

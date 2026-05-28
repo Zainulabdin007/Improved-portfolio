@@ -8,9 +8,9 @@ export const SCROLL_SCRUB_HFLOW = 2.1
 
 /**
  * #page-2 height (svh) — keep PageTwo.css height in sync.
- * Extra runway after hands finish eases sphere → about without rushing the hand scrub.
+ * ~100svh pin + hand scrub + short tail before #about (avoid dead scroll).
  */
-export const SPHERE_SECTION_SCROLL_SVH = 385
+export const SPHERE_SECTION_SCROLL_SVH = 270
 
 /** Hand scrub end — finishes while section is still pinned (see SPHERE_SECTION_SCROLL_SVH). */
-export const SPHERE_HANDS_SCROLL_END = '+=115%'
+export const SPHERE_HANDS_SCROLL_END = '+=112%'

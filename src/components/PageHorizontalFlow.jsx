@@ -316,7 +316,7 @@ export default function PageHorizontalFlow() {
         const computerPanel = computerPanelRef.current
 
         if (p < ABOUT_HOLD_END) {
-          // Phase 0a — about panel dwell (extra scroll runway)
+          // Phase 0a — brief about dwell before computer enters
           track.style.transform = 'translate3d(0, 0, 0)'
           computerPanel?.style.setProperty('--enter', '0')
           rotationRef.current = 0

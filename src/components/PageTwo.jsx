@@ -1,7 +1,7 @@
 import HeroHands from './HeroHands'
 import HeroScene from './HeroScene'
 import HeroWaveDivider from './HeroWaveDivider'
-import Waves from './Waves'
+import RippleGrid from './RippleGrid/RippleGrid'
 import './PageTwo.css'
 
 /**
@@ -14,18 +14,19 @@ export default function PageTwo() {
       <HeroWaveDivider placement="below" />
       <div className="sphere-pin">
         <div className="sphere-pin__bg" aria-hidden="true">
-          <Waves
-            lineColor="rgba(255, 214, 0, 0.24)"
-            backgroundColor="#000000"
-            waveSpeedX={0.0125}
-            waveSpeedY={0.01}
-            waveAmpX={40}
-            waveAmpY={20}
-            friction={0.9}
-            tension={0.01}
-            maxCursorMove={120}
-            xGap={12}
-            yGap={36}
+          <RippleGrid
+            enableRainbow={false}
+            gridColor="#5227FF"
+            rippleIntensity={0.01}
+            gridSize={13}
+            gridThickness={41}
+            mouseInteraction={false}
+            mouseInteractionRadius={0.2}
+            opacity={0.55}
+            fadeDistance={1.5}
+            vignetteStrength={1.5}
+            glowIntensity={1}
+            gridRotation={0}
           />
         </div>
         <HeroScene />

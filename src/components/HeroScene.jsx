@@ -1,7 +1,10 @@
-import { Suspense, useLayoutEffect, useRef } from 'react'
+import { Suspense, useLayoutEffect, useRef, useState } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import AnimatedSphere from './AnimatedSphere'
-import { readUiScale, onViewportScaleChange } from '../utils/viewportVars'
+import {
+  getUiScaleForElement,
+  onViewportScaleChange,
+} from '../utils/viewportVars'
 import './HeroScene.css'
 
 function SceneLights() {
@@ -28,7 +31,7 @@ function ScaledCamera({ stageRef }) {
       const h = stage.clientHeight
       if (w <= 0 || h <= 0) return
 
-      const ui = readUiScale()
+      const ui = getUiScaleForElement(stage)
       camera.position.set(0, 0, 5.8 / ui)
       camera.fov = 40
       camera.aspect = w / h
@@ -49,7 +52,7 @@ function ScaledCamera({ stageRef }) {
   return null
 }
 
-function HeroCanvas({ stageRef }) {
+function HeroCanvas({ stageRef, uiScale }) {
   return (
     <Canvas
       className="hero__canvas"
@@ -73,7 +76,7 @@ function HeroCanvas({ stageRef }) {
       <ScaledCamera stageRef={stageRef} />
       <Suspense fallback={null}>
         <SceneLights />
-        <AnimatedSphere />
+        <AnimatedSphere uiScale={uiScale} />
       </Suspense>
     </Canvas>
   )
@@ -81,10 +84,27 @@ function HeroCanvas({ stageRef }) {
 
 export default function HeroScene() {
   const stageRef = useRef(null)
+  const [uiScale, setUiScale] = useState(1)
+
+  useLayoutEffect(() => {
+    const stage = stageRef.current
+    if (!stage) return
+
+    const update = () => setUiScale(getUiScaleForElement(stage))
+    update()
+
+    const ro = new ResizeObserver(update)
+    ro.observe(stage)
+    const off = onViewportScaleChange(update)
+    return () => {
+      ro.disconnect()
+      off()
+    }
+  }, [])
 
   return (
     <div ref={stageRef} className="hero__stage">
-      <HeroCanvas stageRef={stageRef} />
+      <HeroCanvas stageRef={stageRef} uiScale={uiScale} />
     </div>
   )
 }
