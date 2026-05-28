@@ -68,7 +68,7 @@
 
 
 
-/* RippleGrid WebGL background */
+/* PatternPad tiled background (SVG in public/) */
 
 .sphere-pin__bg {
   position: absolute;
@@ -76,7 +76,6 @@
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  background: #000000;
 }
 
 

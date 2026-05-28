@@ -1,0 +1,119 @@
+.patternpad-bg {
+
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+
+  height: 100%;
+
+  overflow: hidden;
+
+  pointer-events: none;
+
+  background-color: #0a0a0a;
+
+}
+
+
+
+.patternpad-bg__tile {
+
+  --pattern-tile-w: 1900px;
+
+  --pattern-tile-h: 1068.75px; /* 1200×675 tile aspect */
+
+  position: absolute;
+
+  inset: 0;
+
+  background-image: url('/patternpad-2026-05-28-16-29-52.svg');
+
+  background-repeat: repeat;
+
+  background-size: var(--pattern-tile-w) var(--pattern-tile-h);
+
+  background-position: 0 var(--pattern-tile-h);
+
+  animation: patternpad-square-pan 120s linear infinite;
+
+  will-change: background-position;
+
+}
+
+
+
+/* BL → BR → TR → TL → BL (one tile per edge, seamless with repeat) */
+
+@keyframes patternpad-square-pan {
+
+  0%,
+
+  100% {
+
+    background-position: 0 var(--pattern-tile-h);
+
+  }
+
+  25% {
+
+    background-position: var(--pattern-tile-w) var(--pattern-tile-h);
+
+  }
+
+  50% {
+
+    background-position: var(--pattern-tile-w) 0;
+
+  }
+
+  75% {
+
+    background-position: 0 0;
+
+  }
+
+}
+
+
+
+/* Soft vignette so the WATCARD and hands stay readable */
+
+.patternpad-bg__shade {
+
+  position: absolute;
+
+  inset: 0;
+
+  background: radial-gradient(
+
+    ellipse 85% 75% at 50% 45%,
+
+    transparent 0%,
+
+    rgba(0, 0, 0, 0.55) 100%
+
+  );
+
+  pointer-events: none;
+
+}
+
+
+
+@media (prefers-reduced-motion: reduce) {
+
+  .patternpad-bg__tile {
+
+    animation: none;
+
+    background-position: center;
+
+    will-change: auto;
+
+  }
+
+}
+
+

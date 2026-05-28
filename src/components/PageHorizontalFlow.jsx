@@ -258,7 +258,7 @@ const EXPERIENCES = [
     ],
   },
   {
-    title: 'IT Support Specialist',
+    title: 'Network Engineer Intern',
     company: 'Waterloo Regional Health Network',
     dates: 'May 2026 — Present',
     location: 'Kitchener, ON',
