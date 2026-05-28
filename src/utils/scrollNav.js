@@ -37,12 +37,6 @@ export function resetScrollDrivenStyles() {
   const hflowComputer = document.querySelector('.hflow-panel--computer')
   if (hflowComputer) hflowComputer.style.setProperty('--enter', '0')
 
-  const aboutCard = document.querySelector('.hflow-card')
-  if (aboutCard) {
-    aboutCard.style.setProperty('--about-opacity', '0')
-    aboutCard.style.setProperty('--about-x', '1')
-  }
-
   const expStrip = document.querySelector('.hflow-experience-strip')
   if (expStrip) expStrip.style.transform = 'translate3d(0px, 0, 0)'
 

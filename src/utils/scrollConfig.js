@@ -12,5 +12,5 @@ export const SCROLL_SCRUB_HFLOW = 2.1
  */
 export const SPHERE_SECTION_SCROLL_SVH = 385
 
-/** Hand scrub end — earlier finish offsets taller section (see SPHERE_SECTION_SCROLL_SVH). */
-export const SPHERE_HANDS_SCROLL_END = 'bottom 90%'
+/** Hand scrub end — finishes while section is still pinned (see SPHERE_SECTION_SCROLL_SVH). */
+export const SPHERE_HANDS_SCROLL_END = '+=115%'
