@@ -44,9 +44,10 @@ export default function ScrollExperience({ children }) {
             ease: 'none',
             scrollTrigger: {
               trigger: sphereSection,
-              start: 'top 92%',
+              start: 'top top',
               end: SPHERE_HANDS_SCROLL_END,
               scrub: SCROLL_SCRUB,
+              invalidateOnRefresh: true,
             },
           },
         )

@@ -18,7 +18,7 @@ const BOOT_LINES = [
   {
     id: 't3',
     kind: 'task',
-    label: 'Parsing sphere morph targets',
+    label: 'Parsing WATCARD mesh',
     dots: '............',
     status: 'OK',
     statusTone: 'ok',
@@ -179,14 +179,14 @@ const BOOT_LINES = [
 ]
 
 /** Global scale for boot pacing — lower = shorter loader (line timings are design-time ms). */
-const BOOT_PACE = 0.44
+const BOOT_PACE = 0.38
 
 function bootMs(ms) {
   return Math.max(60, Math.round(ms * BOOT_PACE))
 }
 
 const POST_SEQUENCE_MS = 500
-const MIN_BOOT_MS = 5200
+const MIN_BOOT_MS = 3600
 /** Split-door reveal duration after boot completes. */
 const DOOR_REVEAL_MS = 1000
 const STATUS_ANIM_MS = bootMs(200)
@@ -598,7 +598,7 @@ export default function LoadingScreen({ onBeforeFade, onDone }) {
 
     const enterSite = async () => {
       if (cancelled) return
-      setBootProgress(100)
+      setBootProgress((prev) => Math.max(prev, 100))
       try {
         await onBeforeFade?.()
       } catch {
@@ -615,7 +615,7 @@ export default function LoadingScreen({ onBeforeFade, onDone }) {
 
     Promise.all([finalizeSiteBoot(), minTime, sequenceReady]).then(() => {
       if (cancelled) return
-      setBootProgress(100)
+      setBootProgress((prev) => Math.max(prev, 100))
       if (isMobileExperience()) {
         setPhase('prompt')
       } else {
@@ -636,17 +636,19 @@ export default function LoadingScreen({ onBeforeFade, onDone }) {
     let frac = 0
     if (lineIndex < 0) frac = 0
     else if (lineIndex >= BOOT_LINES.length) frac = 1
-    else frac = (lineIndex + (showStatus ? 0.92 : 0.45)) / total
-    setBootProgress(Math.min(99, Math.round(frac * 100)))
+    else frac = (lineIndex + (showStatus ? 0.95 : 0.55)) / total
+
+    const next = Math.min(99, Math.round(frac * 100))
+    setBootProgress((prev) => Math.max(prev, next))
   }, [showBoot, lineIndex, showStatus])
 
   useEffect(() => {
     if (!showBoot || !sequenceDone) return
-    setBootProgress(100)
+    setBootProgress((prev) => Math.max(prev, 100))
   }, [showBoot, sequenceDone])
 
   const handleContinue = async () => {
-    setBootProgress(100)
+    setBootProgress((prev) => Math.max(prev, 100))
     try {
       await onBeforeFade?.()
     } catch {

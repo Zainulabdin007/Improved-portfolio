@@ -1,7 +1,13 @@
 /*
  * Hand sizes are set in JS from viewportVars.js (reference 1920×1080 × --ui-scale).
- * --hand-progress: 0 → off-screen | 1 → resting beside the sphere
+ * --hand-progress: 0 → off-screen | 1 → resting beside the card
  */
+
+@property --hand-progress {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
 
 .hero__hands {
   position: absolute;
@@ -15,7 +21,7 @@
   --hand-width: var(--ref-hand-w, 436px);
   --hand-height: var(--ref-hand-h, 827px);
   --hand-scale: var(--ref-hand-mult, 3.17);
-  --hand-travel: calc(1920px * 1.2 * var(--ui-scale, 1));
+  /* --hand-travel set on layout root via syncHandLayoutVars */
   --hand-y-left: -46%;
   --hand-y-right: -44%;
   --hand-edge-left: calc(-1920px * 0.04 * var(--ui-scale, 1));

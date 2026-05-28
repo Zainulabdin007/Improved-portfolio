@@ -6,46 +6,6 @@
   z-index: 0;
 }
 
-/* Animated SVG gradient background */
-.hero__stage::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image: url('/gradientbackground.svg');
-  background-repeat: no-repeat;
-  background-size: 150%;
-  background-position: 0% 100%;
-  animation: hero-bg-corner-pan 28s linear infinite;
-}
-
-@keyframes hero-bg-corner-pan {
-  0%,
-  100% {
-    background-position: 0% 100%;
-  }
-
-  25% {
-    background-position: 100% 100%;
-  }
-
-  50% {
-    background-position: 100% 0%;
-  }
-
-  75% {
-    background-position: 0% 0%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero__stage::before {
-    animation: none;
-    background-size: cover;
-    background-position: center center;
-  }
-}
-
 .hero__canvas {
   position: absolute;
   inset: 0;

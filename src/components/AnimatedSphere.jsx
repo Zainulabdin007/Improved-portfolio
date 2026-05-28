@@ -10,10 +10,10 @@ useGLTF.preload(GLB_URL)
 
 /** Rotation around the vertical (Y) world axis — planet pole spin */
 const VERTICAL_SPIN_SPEED = 0.32
-const MODEL_SCALE = 1.122 /* 1.181 × 0.95 */
+const MODEL_SCALE = 1.68 /* 2.4 × 0.7 */
 const ANIMATION_SPEED = 1.85
-/** Tilts the sphere so Y-axis spin is visible (symmetric blobs hide pure Y rotation) */
-const AXIAL_TILT = 0.42
+/** Slight tilt so Y-axis spin reads on the card */
+const AXIAL_TILT = 0.28
 
 function buildMorphClip(animations) {
   const source =
@@ -54,15 +54,15 @@ export default function AnimatedSphere() {
 
       const materials = Array.isArray(child.material) ? child.material : [child.material]
       materials.forEach((material) => {
-        if (material.color) material.color.multiplyScalar(1.2)
+        if (material.color) material.color.multiplyScalar(1.12)
         if ('emissive' in material && material.emissive) {
-          material.emissive.addScalar(0.08)
+          material.emissive.addScalar(0.04)
         }
         if ('emissiveIntensity' in material) {
-          material.emissiveIntensity = Math.max(material.emissiveIntensity, 0.25)
+          material.emissiveIntensity = Math.max(material.emissiveIntensity, 0.18)
         }
         if ('roughness' in material) {
-          material.roughness *= 0.82
+          material.roughness *= 0.88
         }
         material.needsUpdate = true
       })

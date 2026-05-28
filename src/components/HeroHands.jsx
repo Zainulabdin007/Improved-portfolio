@@ -12,11 +12,15 @@ function HeroHand({ side }) {
   )
 }
 
-export default function HeroHands() {
+export default function HeroHands({ layoutRootClass = 'hero__stage' }) {
   const rootRef = useRef(null)
 
   useLayoutEffect(() => {
-    const stage = rootRef.current?.closest('.hero__stage')
+    const root = rootRef.current
+    if (!root) return
+
+    const stage =
+      root.closest(`.${layoutRootClass}`) ?? root.closest('.hero__stage')
     if (!stage) return
 
     const update = () => syncHandLayoutVars(stage)
@@ -26,7 +30,7 @@ export default function HeroHands() {
     ro.observe(stage)
 
     return () => ro.disconnect()
-  }, [])
+  }, [layoutRootClass])
 
   return (
     <div ref={rootRef} className="hero__hands" aria-hidden="true">

@@ -1,17 +1,16 @@
 import { Suspense, useLayoutEffect, useRef } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import AnimatedSphere from './AnimatedSphere'
-import HeroHands from './HeroHands'
 import { readUiScale, onViewportScaleChange } from '../utils/viewportVars'
 import './HeroScene.css'
 
 function SceneLights() {
   return (
     <>
-      <ambientLight intensity={1.35} />
-      <directionalLight position={[4, 6, 5]} intensity={1.65} />
-      <directionalLight position={[-3, 2, 4]} intensity={0.85} />
-      <pointLight position={[0, 2, 4]} intensity={14} distance={14} />
+      <ambientLight intensity={1.1} />
+      <directionalLight position={[4, 6, 5]} intensity={1.35} />
+      <directionalLight position={[-3, 2, 4]} intensity={0.7} />
+      <pointLight position={[0, 2, 4]} intensity={11} distance={14} />
     </>
   )
 }
@@ -86,7 +85,6 @@ export default function HeroScene() {
   return (
     <div ref={stageRef} className="hero__stage">
       <HeroCanvas stageRef={stageRef} />
-      <HeroHands />
     </div>
   )
 }
