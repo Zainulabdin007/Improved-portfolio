@@ -31,8 +31,10 @@ export function getViewportSize() {
 }
 
 /**
- * Uniform scale vs 1920×1080. Uses the smaller of width/height ratio so
- * the layout always fits the viewport and keeps the same proportions.
+ * Uniform scale vs 1920×1080.
+ * - Wider than 16:9: limited by height (short viewports shrink).
+ * - Taller than 16:9: limited by width but not upscaled past 1080p fit, so
+ *   e.g. 1920×1200 matches 1920×1080 instead of growing with extra height.
  */
 export function getUiScale(w, h) {
   const size =
@@ -40,11 +42,30 @@ export function getUiScale(w, h) {
   const width = size.width
   const height = size.height
   if (width <= 0 || height <= 0) return 1
-  return clamp(
-    Math.min(width / REF_WIDTH, height / REF_HEIGHT),
-    SCALE_MIN,
-    SCALE_MAX,
-  )
+
+  const scaleW = width / REF_WIDTH
+  const scaleH = height / REF_HEIGHT
+  const refAspect = REF_WIDTH / REF_HEIGHT
+  const vpAspect = width / height
+
+  const ui =
+    vpAspect >= refAspect
+      ? Math.min(scaleW, scaleH)
+      : Math.min(scaleW, 1)
+
+  return clamp(ui, SCALE_MIN, SCALE_MAX)
+}
+
+/**
+ * Pull the camera back when the stage is taller than 16:9 so the model matches
+ * 1920×1080 framing (vertical FOV is fixed; extra height shrinks horizontal FOV).
+ */
+export function getTallViewportCameraFactor(w, h) {
+  if (w <= 0 || h <= 0) return 1
+  const aspect = w / h
+  const refAspect = REF_WIDTH / REF_HEIGHT
+  if (aspect >= refAspect) return 1
+  return refAspect / aspect
 }
 
 /** Scale for a pinned stage / canvas host (uses its box, not the full window). */

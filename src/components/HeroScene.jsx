@@ -2,6 +2,7 @@ import { Suspense, useLayoutEffect, useRef, useState } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import AnimatedSphere from './AnimatedSphere'
 import {
+  getTallViewportCameraFactor,
   getUiScaleForElement,
   onViewportScaleChange,
 } from '../utils/viewportVars'
@@ -32,7 +33,8 @@ function ScaledCamera({ stageRef }) {
       if (w <= 0 || h <= 0) return
 
       const ui = getUiScaleForElement(stage)
-      camera.position.set(0, 0, 5.8 / ui)
+      const tall = getTallViewportCameraFactor(w, h)
+      camera.position.set(0, 0, (5.8 / ui) * tall)
       camera.fov = 40
       camera.aspect = w / h
       camera.lookAt(0, 0, 0)
