@@ -147,6 +147,12 @@
  * PANEL 1 — About card
  * ============================================================ */
 
+/* Sal leaves cards at opacity 0 until animated — keep stacking context */
+.hflow-card[data-sal],
+.hflow-slide[data-sal] {
+  will-change: opacity, transform;
+}
+
 .hflow-card {
   position: relative;
   width: min(97%, var(--ref-card-w, 1280px));
@@ -442,6 +448,14 @@
   font-size: clamp(0.98rem, 1.05vw, 1.05rem);
   line-height: 1.6;
   color: rgba(245, 245, 247, 0.82);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hflow-card[data-sal],
+  .hflow-slide[data-sal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 .hflow-slide {

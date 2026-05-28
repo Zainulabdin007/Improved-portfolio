@@ -46,6 +46,7 @@ import { markBootGate, signalScrollSetup } from '../utils/bootReadiness'
 import { resetScrollDrivenStyles } from '../utils/scrollNav'
 import { renderBoldSegments } from '../utils/renderBoldSegments'
 import { SCROLL_SCRUB_HFLOW } from '../utils/scrollConfig'
+import { destroySal, initSal, refreshSal } from '../utils/salScroll'
 import './PageHorizontalFlow.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -297,12 +298,25 @@ export default function PageHorizontalFlow() {
   const scrollActiveRef = useRef(0) // timestamp of last scroll-trigger update
 
   useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      initSal()
+      refreshSal()
+    })
+    return () => {
+      cancelAnimationFrame(frame)
+      destroySal()
+    }
+  }, [])
+
+  useEffect(() => {
     const section = sectionRef.current
     const track = trackRef.current
     const stage = computerStageRef.current
     if (!section || !track || !stage) return
 
     resetScrollDrivenStyles()
+
+    let lastSalRefresh = 0
 
     const trigger = ScrollTrigger.create({
       trigger: section,
@@ -366,6 +380,12 @@ export default function PageHorizontalFlow() {
         }
 
         dinoPosRef.current = dinoPositionForProgress(p)
+
+        const now = performance.now()
+        if (now - lastSalRefresh > 180) {
+          lastSalRefresh = now
+          refreshSal()
+        }
       },
     })
 
@@ -402,7 +422,13 @@ export default function PageHorizontalFlow() {
                 yGap={36}
               />
             </div>
-            <article className="hflow-card">
+            <article
+              className="hflow-card"
+              data-sal="slide-up"
+              data-sal-duration="1000"
+              data-sal-delay="80"
+              data-sal-easing="ease-out-cubic"
+            >
               <TopoPattern className="hflow-card__topo" />
               <div className="hflow-card__inner">
                 <div className="hflow-photo">
@@ -585,8 +611,15 @@ export default function PageHorizontalFlow() {
                   </p>
                 </header>
 
-                {EXPERIENCES.map((exp) => (
-                  <article key={exp.company} className="hflow-slide">
+                {EXPERIENCES.map((exp, index) => (
+                  <article
+                    key={exp.company}
+                    className="hflow-slide"
+                    data-sal="slide-up"
+                    data-sal-duration="850"
+                    data-sal-delay={String(100 + index * 140)}
+                    data-sal-easing="ease-out-cubic"
+                  >
                     <header className="hflow-slide__header">
                       <p className="hflow-slide__dates">{exp.dates}</p>
                       <h3 className="hflow-slide__role">{exp.title}</h3>
