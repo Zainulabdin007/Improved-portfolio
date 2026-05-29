@@ -1,0 +1,92 @@
+.tech-logo-float {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.tech-logo-float__scatter {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Fade in on scroll forward; stay visible until user scrolls back */
+.tech-logo-float__tile {
+  --threshold: 0;
+  --fade-band: 0.045;
+  --reveal: clamp(0, calc((var(--logo-progress) - var(--threshold)) / var(--fade-band)), 1);
+  position: absolute;
+  opacity: var(--reveal);
+  transform: translate(-50%, calc(-50% + (1 - var(--reveal)) * 14px));
+  list-style: none;
+  will-change: opacity, transform;
+}
+
+.tech-logo-float__tile-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: clamp(64px, 7vw, 90px);
+  padding: clamp(8px, 1vmin, 12px) clamp(10px, 1.2vmin, 14px);
+  border-radius: clamp(10px, 1.3vw, 16px);
+  background: rgba(10, 10, 10, 0.72);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.tech-logo-float__icon {
+  width: clamp(24px, 3vmin, 34px);
+  height: clamp(24px, 3vmin, 34px);
+  color: #f5f5f7;
+}
+
+.tech-logo-float__img {
+  width: clamp(24px, 3vmin, 34px);
+  height: clamp(24px, 3vmin, 34px);
+  object-fit: contain;
+  filter: grayscale(1) brightness(1.15) contrast(1.05);
+}
+
+.tech-logo-float__label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(0.65rem, 1.15vmin, 0.85rem);
+  font-weight: 500;
+  line-height: 1.1;
+  color: #f5f5f7;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .tech-logo-float__tile-inner {
+    min-width: 54px;
+    padding: 6px 8px;
+  }
+
+  .tech-logo-float__icon,
+  .tech-logo-float__img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .tech-logo-float__label {
+    font-size: 0.58rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tech-logo-float__tile {
+    --reveal: 1;
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}

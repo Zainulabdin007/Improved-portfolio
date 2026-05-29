@@ -2,7 +2,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { runBootPreload } from './bootPreload'
 import { resetScrollDrivenStyles, resetScrollToTop } from './scrollNav'
 
-/** @typedef {'aurora' | 'heroGltf' | 'hflowComputer' | 'hflowDino' | 'gradientBlinds' | 'projectsLayout' | 'scrollLayout'} BootGateName */
+/** @typedef {'aurora' | 'sphereComputer' | 'hflowDino' | 'gradientBlinds' | 'projectsLayout' | 'scrollLayout'} BootGateName */
 
 function createGate() {
   let settled = false
@@ -36,8 +36,7 @@ function createGate() {
 /** @type {Record<BootGateName, ReturnType<typeof createGate>>} */
 const gates = {
   aurora: createGate(),
-  heroGltf: createGate(),
-  hflowComputer: createGate(),
+  sphereComputer: createGate(),
   hflowDino: createGate(),
   gradientBlinds: createGate(),
   projectsLayout: createGate(),
@@ -47,7 +46,6 @@ const gates = {
 const SCROLL_LAYOUT_SOURCES = new Set([
   'scroll-experience',
   'page-horizontal-flow',
-  'page-blank',
 ])
 
 let pendingScrollSources = new Set(SCROLL_LAYOUT_SOURCES)
@@ -173,8 +171,7 @@ export async function waitForSitePainted() {
 
 const BOOT_GATE_NAMES = [
   'aurora',
-  'heroGltf',
-  'hflowComputer',
+  'sphereComputer',
   'hflowDino',
   'gradientBlinds',
   'projectsLayout',

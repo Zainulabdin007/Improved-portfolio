@@ -7,7 +7,6 @@ import HeroHints from './components/HeroHints'
 import LoadingScreen from './components/LoadingScreen'
 import PageTwo from './components/PageTwo'
 import PageHorizontalFlow from './components/PageHorizontalFlow'
-import PageBlank from './components/PageBlank'
 import ScrollExperience from './components/ScrollExperience'
 import { waitForSitePainted } from './utils/bootReadiness'
 import { resetScrollDrivenStyles, resetScrollToTop } from './utils/scrollNav'
@@ -64,7 +63,6 @@ export default function App() {
             </section>
             <PageTwo />
             <PageHorizontalFlow />
-            <PageBlank />
           </main>
         </ScrollExperience>
       </div>

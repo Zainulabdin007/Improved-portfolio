@@ -52,7 +52,7 @@ export default function TopoPattern({ className = '' }) {
 
       {/* Solid contour group — three overlapping centers */}
       <g
-        stroke="#fb923c"
+        stroke="var(--palette-red)"
         fill="none"
         strokeWidth="1.5"
         filter="url(#topo-warp)"

@@ -1,74 +1,36 @@
-/* Tall scroll zone — pin + hand scrub; keep in sync with scrollConfig SPHERE_SECTION_SCROLL_SVH */
+/* Tall scroll zone — pin + hand scrub; sync SPHERE_SECTION_SCROLL_SVH */
 
 .page-section--sphere {
-
   position: relative;
-
   width: 100%;
-
-  height: 270vh;
-
-  height: 270svh; /* sync: SPHERE_SECTION_SCROLL_SVH in scrollConfig.js */
-
-  background: #000000;
-
+  /* height: set inline from SPHERE_SECTION_SCROLL_SVH in PageTwo.jsx */
+  min-height: 100svh;
+  background: var(--palette-black);
   overflow: visible;
-
 }
-
-
-
-/* Top wave sits in the pin layer so it does not eat scroll before the sphere sticks */
 
 .page-section--sphere > .hero-wave-divider--below {
-
   position: absolute;
-
   top: 0;
-
   left: 0;
-
   right: 0;
-
   z-index: 6;
-
 }
-
-
-
-/* Sticky inner viewport keeps the WATCARD centered while scrolling page 2 */
 
 .sphere-pin {
-
   position: sticky;
-
   top: 0;
-
   width: 100%;
-
   height: 100vh;
-
   height: 100svh;
-
   overflow: visible;
-
   isolation: isolate;
-
   z-index: 0;
-
-  background: #000000;
-
+  background: var(--palette-black);
   --ui-scale: 1;
-
-  --watcard-ui-scale: 1;
-
+  --logo-progress: 0;
   --hand-travel: calc(1920px * 1.2 * var(--ui-scale, 1));
-
 }
-
-
-
-/* PatternPad tiled background (SVG in public/) */
 
 .sphere-pin__bg {
   position: absolute;
@@ -78,50 +40,18 @@
   overflow: hidden;
 }
 
-
-
-.sphere-pin .hero__stage {
-
-  position: relative;
-
-  z-index: 1;
-
-  width: 100%;
-
-  height: 100%;
-
-  overflow: visible;
-
-  pointer-events: none;
-
-}
-
-
-
-/* Hands sit above WebGL */
-
 .sphere-pin .hero__hands {
-
   position: absolute;
-
   inset: 0;
-
-  z-index: 5;
-
   pointer-events: none;
-
 }
 
-
+.page-section--sphere .hero__hands {
+  z-index: 6;
+}
 
 .page-section--sphere .hero__hand__img {
-
-  mix-blend-mode: lighten;
-
-  -webkit-mix-blend-mode: lighten;
-
+  mix-blend-mode: screen;
+  -webkit-mix-blend-mode: screen;
   filter: brightness(1.12) contrast(1.05);
-
 }
-
-

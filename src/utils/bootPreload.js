@@ -1,5 +1,5 @@
 import { useGLTF } from '@react-three/drei'
-import { GLB_URL } from '../constants'
+import { COMPUTER_GLB_URL } from '../constants'
 
 /** Above-the-fold / first-scroll assets */
 const CRITICAL_IMAGES = [
@@ -14,7 +14,7 @@ const CRITICAL_IMAGES = [
   '/cooptrack.png',
 ]
 
-const GLTF_URLS = [GLB_URL, '/my_computer.glb', '/3d_chrome_dino_walking.glb']
+const GLTF_URLS = [COMPUTER_GLB_URL, '/3d_chrome_dino_walking.glb']
 
 function waitForWindowLoad() {
   if (typeof document === 'undefined') return Promise.resolve()

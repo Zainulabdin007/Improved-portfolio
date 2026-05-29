@@ -1,0 +1,22 @@
+.computer-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Smaller centered viewport — model was filling 100% of the pin */
+.computer-stage__canvas {
+  position: relative;
+  width: min(7.2vw, 94px);
+  height: min(6.5svh, 83px);
+  max-width: 88%;
+  flex-shrink: 0;
+}
+
+.computer-stage__canvas canvas {
+  display: block;
+}

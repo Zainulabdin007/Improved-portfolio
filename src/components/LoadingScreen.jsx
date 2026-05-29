@@ -18,7 +18,7 @@ const BOOT_LINES = [
   {
     id: 't3',
     kind: 'task',
-    label: 'Parsing WATCARD mesh',
+    label: 'Parsing computer mesh',
     dots: '............',
     status: 'OK',
     statusTone: 'ok',

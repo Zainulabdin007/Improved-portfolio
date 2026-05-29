@@ -228,14 +228,6 @@
   align-items: center;
   text-align: center;
   gap: 16px;
-
-  opacity: 0;
-  transform: translate3d(0, 28px, 0);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-.projects-header.is-visible {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
 }
 
 .projects-header__eyebrow {
@@ -283,14 +275,6 @@
 .project-card {
   --accent: #ff9ffc;
   position: relative;
-
-  opacity: 0;
-  transform: translate3d(0, 48px, 0);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-.project-card.is-visible {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
 }
 
 /* The BorderGlow root — give it full width and the same accent context */

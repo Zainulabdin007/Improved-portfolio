@@ -2,7 +2,7 @@ import { useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { signalScrollSetup } from '../utils/bootReadiness'
-import { SCROLL_SCRUB, SPHERE_HANDS_SCROLL_END } from '../utils/scrollConfig'
+import { SCROLL_SCRUB } from '../utils/scrollConfig'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -31,27 +31,7 @@ export default function ScrollExperience({ children }) {
         })
       }
 
-      // Page 2: scrub hands in from off-screen as the sphere is pinned.
-      // Hands finish before the section ends so extra page-2 height only slows sphere → about.
-      const sphereSection = document.querySelector('#page-2')
-      const hands = document.querySelectorAll('#page-2 .hero__hand')
-      if (sphereSection && hands.length) {
-        gsap.fromTo(
-          hands,
-          { '--hand-progress': 0 },
-          {
-            '--hand-progress': 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: sphereSection,
-              start: 'top top',
-              end: SPHERE_HANDS_SCROLL_END,
-              scrub: SCROLL_SCRUB,
-              invalidateOnRefresh: true,
-            },
-          },
-        )
-      }
+      /* Hand scrub for #page-2 lives in PageTwo.jsx (same trigger as computer spin). */
     })
 
     signalScrollSetup('scroll-experience')

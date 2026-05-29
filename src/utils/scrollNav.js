@@ -1,5 +1,9 @@
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { HFLOW_EXPERIENCE_NAV_PROGRESS } from './hflowScrollPhases'
+import {
+  HFLOW_CONTACT_NAV_PROGRESS,
+  HFLOW_EXPERIENCE_NAV_PROGRESS,
+  HFLOW_PROJECTS_NAV_PROGRESS,
+} from './hflowScrollPhases'
 
 /** Force window scroll (and URL hash) back to the hero on a fresh visit. */
 export function resetScrollToTop({ clearHash = true } = {}) {
@@ -31,48 +35,48 @@ export function resetScrollDrivenStyles() {
   const hflowTrack = document.querySelector('.hflow-track')
   if (hflowTrack) hflowTrack.style.transform = 'translate3d(0, 0, 0)'
 
-  const hflowStage = document.querySelector('.hflow-stage')
-  if (hflowStage) hflowStage.style.setProperty('--progress', '0')
-
-  const hflowComputer = document.querySelector('.hflow-panel--computer')
-  if (hflowComputer) hflowComputer.style.setProperty('--enter', '0')
-
   const expStrip = document.querySelector('.hflow-experience-strip')
   if (expStrip) expStrip.style.transform = 'translate3d(0px, 0, 0)'
 
-  const projectsTrack = document.querySelector('.projects-track')
-  if (projectsTrack) projectsTrack.style.transform = 'translate3d(-50%, 0, 0)'
+  const spherePin = document.querySelector('.sphere-pin')
+  if (spherePin) spherePin.style.setProperty('--logo-progress', '0')
 
-  const projectsShell = document.querySelector('.projects-shell')
+  document.querySelectorAll('#page-2 .hero__hand').forEach((hand) => {
+    hand.style.setProperty('--hand-progress', '0')
+  })
+
+  const projectsShell = document.querySelector(
+    '.hflow-panel--projects .projects-shell',
+  )
   if (projectsShell) projectsShell.style.transform = 'translate3d(0, 0, 0)'
 
   const hero = document.querySelector('#home')
   if (hero) hero.style.opacity = ''
 }
 
-/** Start of #about — card is fixed in place (no rise animation). */
+/** Nav scroll targets within unified #about horizontal flow. */
 const ABOUT_PROGRESS = 0
-const EXPERIENCE_PROGRESS = HFLOW_EXPERIENCE_NAV_PROGRESS
-/** End of #projects + small overscroll so smooth scroll finishes the contact pan. */
-const CONTACT_PROGRESS = 1
-const CONTACT_EXTRA_PX = 120
 
 export const NAV_ITEMS = [
   { key: 'home', label: 'Home', sectionId: 'home', progress: 0 },
   { key: 'about', label: 'About Me', sectionId: 'about', progress: ABOUT_PROGRESS },
   {
+    key: 'projects',
+    label: 'Projects',
+    sectionId: 'about',
+    progress: HFLOW_PROJECTS_NAV_PROGRESS,
+  },
+  {
     key: 'experience',
     label: 'Experience',
     sectionId: 'about',
-    progress: EXPERIENCE_PROGRESS,
+    progress: HFLOW_EXPERIENCE_NAV_PROGRESS,
   },
-  { key: 'projects', label: 'Projects', sectionId: 'projects', progress: 0 },
   {
     key: 'contact',
     label: 'Contact',
-    sectionId: 'projects',
-    progress: CONTACT_PROGRESS,
-    extraPx: CONTACT_EXTRA_PX,
+    sectionId: 'about',
+    progress: HFLOW_CONTACT_NAV_PROGRESS,
   },
 ]
 
