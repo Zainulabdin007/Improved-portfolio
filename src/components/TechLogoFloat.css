@@ -30,6 +30,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  will-change: transform;
   gap: 5px;
   min-width: clamp(64px, 7vw, 90px);
   padding: clamp(8px, 1vmin, 12px) clamp(10px, 1.2vmin, 14px);
@@ -37,7 +38,7 @@
   background: rgba(10, 10, 10, 0.72);
   -webkit-backdrop-filter: blur(10px) saturate(120%);
   backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid color-mix(in srgb, var(--palette-red) 82%, transparent);
   box-shadow:
     0 10px 26px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -88,5 +89,9 @@
     --reveal: 1;
     opacity: 1;
     transform: translate(-50%, -50%);
+  }
+
+  .tech-logo-float__tile-inner {
+    transform: none !important;
   }
 }

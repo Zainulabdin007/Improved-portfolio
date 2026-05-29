@@ -68,11 +68,11 @@ export const TECH_LOGOS = [
 
   { name: 'Node.js', Icon: SiNodedotjs, x: 14, y: 24 },
 
-  { name: 'React', Icon: SiReact, x: 86, y: 22 },
+  { name: 'React', Icon: SiReact, x: 86, y: 18 },
 
   { name: 'Next.js', Icon: SiNextdotjs, x: 62, y: 18 },
 
-  { name: 'HTML', Icon: SiHtml5, x: 10, y: 26 },
+  { name: 'HTML', Icon: SiHtml5, x: 10, y: 15  },
 
   { name: 'CSS', src: '/CSS3_logo.svg.png', x: 82, y: 28 },
 
@@ -88,7 +88,7 @@ export const TECH_LOGOS = [
 
   { name: 'scikit-learn', Icon: SiScikitlearn, x: 35, y: 78 },
 
-  { name: 'NumPy', Icon: SiNumpy, x: 68, y: 74 },
+  { name: 'NumPy', Icon: SiNumpy, x: 68, y: 80 },
 
   { name: 'Pandas', Icon: SiPandas, x: 84, y: 70 },
 
